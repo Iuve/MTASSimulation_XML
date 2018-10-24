@@ -1,0 +1,72 @@
+#
+# Macro file for the initialization phase of "LENS.cc"
+# when runing in interactive mode
+#
+# Sets some default verbose
+#
+/control/verbose 1
+/run/verbose 0
+/process/verbose 0
+/tracking/verbose 0
+/vis/verbose 1
+/persistency/verbose 0
+/event/verbose 0
+/material/verbose 0
+#/glg4scint/verbose 0
+#
+# create empty scene
+#
+/vis/scene/create
+#
+# Create a scene handler for a specific graphics system
+# (Edit the next line(s) to choose another graphic system)
+#
+/vis/open OGLIX 500 500
+#/vis/open OGLIX 700 700
+#/vis/open OGLIX 900 700
+
+#
+####/vis/open DAWNFILE
+#
+# draw scene
+
+#/vis/viewer/zoom 10 
+#/vis/viewer/pan 1.75 -0.0005
+#/vis/viewer/zoom 2.5
+#/vis/viewer/zoom 1.5
+
+#
+#/vis/viewer/set/viewpointVector 1 1.5 1.1
+#
+#/vis/viewer/set/viewpointThetaPhi 85 5 deg
+
+#/vis/viewer/set/viewpointThetaPhi 10 15 deg
+#/vis/viewer/set/viewpointThetaPhi 100 20 deg
+#/vis/viewer/set/viewpointThetaPhi 90 0 deg
+#/vis/viewer/set/viewpointThetaPhi 115 10 deg
+#/vis/viewer/set/viewpointThetaPhi 112 25 deg
+
+#/vis/viewer/set/viewpointThetaPhi 20 70 deg
+
+# for drawing the tracks need the following 2 lines
+# (if too many tracks cause core dump => storeTrajectory 0)
+/tracking/storeTrajectory 1
+/vis/scene/endOfEventAction accumulate
+
+/random/resetEngineFrom currentEvent.rndm
+#/random/resetEngineFrom beginRandom.rndm
+/random/setSavingFlag true
+
+#/gun/energy 0.498 MeV
+#/gun/energy 0.116 MeV
+#/gun/particle LENSTin497
+/gun/particle gamma
+#/gun/position 0 0 0 m
+#/gun/particle e-
+#/gun/particle mu+
+#/gun/particle neutron
+
+# TEST
+#/gun/energy 1000.00 keV
+#/tracking/verbose 0
+#/run/beamOn 1

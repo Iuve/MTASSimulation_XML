@@ -1,0 +1,159 @@
+139LA    139BA B- DECAY                                          01NDS    200104
+139LA  H TYP=FUL$AUT=T. W. BURROWS$CIT=NDS 92, 623 (2001)$CUT=9-Feb-2001$       
+139BA  P 0.0         7/2-              83.06 M   28             2316.8    27    
+139LA c  1968Hi13 measured |g's and |g|g-coincidences (NaI,Ge(Li)).             
+139LA c  1969Be15 measured |g's and |g|g-coincidences (NaI,Ge(Li)).             
+139LA c  1969Su01 measured |g's and |g(t) (NaI) and |b|g-coincidences and       
+139LA2c  |b|g(|q) (scin,NaI).                                                   
+139LA c  1978La03 measured |g's between 1.2 and 2.0 MeV and investigated        
+139LA2c  ambiguities in I|g between 1968Hi13 and 1969Be15.                      
+139LA c  1980Ge04 measured |g's and 165|g(t) (7 half-lives) and                 
+139LA2c  |b|g-coincidences (4|p,NaI).                                           
+139LA c  1986Fa08 measured |g's below 1.6 MeV (Compton-suppressed Ge(Li)).      
+139LA2c  Levels in the region between 500 keV and 1.1 MeV proposed in Coulomb   
+139LA3c  excitation and (n,n'|g) not confirmed.                                 
+139LA c  Decay scheme is that proposed by 1969Be15 and 1968Hi13. Other: see     
+139LAxc  1989Bu12.                                                              
+139LA cL J,T(A)    From the Adopted Levels. T{-1/2} measurements via |b{+-}     
+139LA2cL decay: 1.48 ns {I3} (1966Be42. |b|g(t), scin), 1.50 ns {I10}           
+139LA3cL (1956De57. |b|g(t), scin), and 1.50 ns {I10} (1955Ge38. |bce(t),       
+139LAxcL scin). See also 1981Pe04.                                              
+139LA cG           |g|g-coincidences are from 1969Be15 and 1968Hi13.            
+139LA cB           1986HeZY: see {+139}Cs |b{+-} decay for experimental details.
+139LA cB           |b|g-coincidences are from 1980Ge04, 1975Fl07, and 1969Su01. 
+139LA cG E         From 1968Hi13, except as noted.                              
+139LA cG RI        From 1969Be15, except as noted; upper limits on |DI|g given. 
+139LA  N 0.00261   26          1.        1.                                     
+139LA cN NR        from I|g(165|g)=23.76% {I25} (1980Ge04).                     
+139LA PN 0.00261   26                                                        3  
+139LA cG M,CC,E(A)$From |e decay.                                               
+139LA CG CC$LABEL=ECC                                                           
+139LA cG E(B)      From 1969Be15.                                               
+139LA cG RI(A)     From 1978La03.                                               
+139LA cG RI(D)     From 1968Hi13. Data of 1969Be15 and 1968Hi13 agree but those 
+139LA2cG of 1968Hi13 seem more precise.                                         
+139LA  L 0.0         7/2+                                                       
+139LA  B 2316      4 69.98   31             6.847 4                             
+139LAS B EAV=916.9 13                                                           
+139LA cB E         from 1986HeZY. Other: 2316 {I20} (1969Su01). Original value  
+139LA2cB of 2400 {I20} was reduced by 84 keV on comparison of E|b(to 166)=2225  
+139LA3cB {I15} with 2141 {I5} (1975Fl07).                                       
+139LA cB IB        from 100-|SI|b(to excited states). Others: 78 {I5}           
+139LA2cB (1969Su01), 73.2 {I8} (1986HeZY).                                      
+139LA  L 165.8576  115/2+              1.499 NS  19                             
+139LAF L FLAG=A                                                                 
+139LA  B 2141       529.68   31             7.089 6                         C   
+139LAS B EAV=841.9 13                                                           
+139LA cB E         from 1975Fl07. Other: see 1989Bu12.                          
+139LA cB IB        from I|g(165|g)(1+|a)-|SI|g(to 165) with I|g(165|g)=23.76%   
+139LA2cB {I25}. Other: see 1989Bu12.                                            
+139LA cB LOGFT     1975Fl07 and 1986HeZY note that this transition has a        
+139LA2cB non-statistical shape factor.                                          
+139LA  G 165.8575  119.09E+3 92M1                      0.2516 7              C  
+139LAS G EKC=0.2146 10$ELC=0.0289 12$MC=0.005948 28$NC+=0.00164 8               
+139LA DG EKC,ELC   FROM EC DECAY                                                
+139LA cG E         from 1979Bo26 (curved-crystal spect).                        
+139LA cG RI        from I|g(165|g)/I|g(1420|g)=100.0 {I10}/1.100 {I13}          
+139LA2cG (1980Ge04) and I|g(1420|g)=100 {I10}; other: see 1989Bu12.             
+139LA3 G %IG=23.76 25 (1980GE04)                                                
+139LA  L     1208.8101/2+                                                      ?
+139LA  G 1042.9      0.01                                                      ?
+139LA cG E,RI      from 1986Fa08.                                               
+139LA  L     1219.0 49/2+                                                       
+139LA  B             0.0042  7               9.81 8                             
+139LAS B EAV=383.3 12                                                           
+139LA  G 1053.0     50.12     5                                              ?  
+139LA cG RI        0.33 {I10} (1968Hi13).                                       
+139LA  G 1219.1     41.5      2                                                 
+139LA  L    1256.6620(5/2)+                                                     
+139LA  B             0.0108  14              9.34 6                             
+139LAS B EAV=367.8 11                                                           
+139LA  G 1090.8     23.1      3                                              C  
+139LA cG RI        6.2 {I4} (1968Hi13).                                         
+139LA  G 1256.7    101.03    12                                                 
+139LAF G FLAG=AB                                                                
+139LA  L     1381.4 4 (9/2+)                                                    
+139LA  B             0.0032  5               9.67 7                             
+139LAS B EAV=317.3 11                                                           
+139LA  G 1215.5     41.2      1                                              C  
+139LA  G 1381.5     50.030   15                                                 
+139LA  L    1420.54155/2+,7/2+                                                  
+139LA  B 906       300.287   7             7.652 12                         C   
+139LAS B EAV=301.7 11                                                           
+139LA cB E         from 1969Su01. Original value of 990 {I30} was reduced by 84 
+139LA2cB keV based on comparison of E|b(to 166)=2225 {I15} with 2141 {I5}       
+139LAxcB (1975Fl07).                                                            
+139LA cB IB        from I|g(1420|g)=0.261% {I5} and                             
+139LA2cB I|g(1255|g)/I|g(1420|g)=0.100 {I14}. Other: see 1989Bu12.              
+139LA  G 1254.7     210       1                                              C  
+139LA cG RI        15.5 {I6} (1968Hi13).                                        
+139LA  G 1420.5     2100     10                                              C  
+139LA3 G %IG=0.261 5 (1980GE04)                                                 
+139LA  L    1476.4217(9/2+)                                                     
+139LA  B             0.0175  20          8.77    5                              
+139LAS B EAV=279.6 11                                                           
+139LA  G 1310.6     26.1     3                                               C  
+139LAF G FLAG=D                                                                 
+139LA  G 1476.3     30.61     1                                                 
+139LA  L    1536.34227/2+                                                       
+139LA  B             0.0051  6           9.19    6                              
+139LAS B EAV=256.3 11                                                           
+139LA  G 1370.5     31.13    11                                              C  
+139LAF G FLAG=D                                                                 
+139LA  G 1536.3     30.81    6                                                  
+139LAF G FLAG=D                                                                 
+139LA  L     1558.2 4 3/2+,5/2+                                                 
+139LA  B             0.00028 10            10.40 16                             
+139LAS B EAV=247.9 11                                                           
+139LA  G 1392.4     50.030   15                                              C  
+139LA  G 1558.2     40.078   30                                                 
+139LAF G FLAG=D                                                                 
+139LA  L     1578.2 45/2+,7/2+                                                  
+139LA  B             0.00052 14            10.09 12                             
+139LAS B EAV=240.3 11                                                           
+139LA  G 1578.2     40.20     5                                                 
+139LA  L     1683.1 3 7/2+                                                      
+139LA  B             0.0026  3           9.16    5                              
+139LAS B EAV=200.8 10                                                           
+139LA  G 1518       10.02    LT                                                ?
+139LAF G FLAG=AB                                                                
+139LA  G 1683.1     30.98    5                                                  
+139LAF G FLAG=D                                                                 
+139LA  L     1761.2 3                                                           
+139LA  B             0.0021  3           9.06    7                              
+139LAS B EAV=172.31 98                                                          
+139LA  G 1595.3     30.79    6                                               C  
+139LAF G FLAG=D                                                                 
+139LA  G 1762       10.03     1                                                 
+139LAF G FLAG=AB                                                                
+139LA  L     1765.8 43/2+,5/2+                                                  
+139LA  B             0.00030 8           9.89    12                             
+139LAS B EAV=170.66 98                                                          
+139LA  G 1601.4    100.05     1                                              C  
+139LAF G FLAG=AB                                                                
+139LA  G 1765.5    4 0.066   25                                                 
+139LAF G FLAG=D                                                                 
+139LA  L     1857.1103/2+,5/2+                                                  
+139LA  B             0.00029  4              9.64 6                             
+139LAS B EAV=138.5 10                                                           
+139LA  G 1691.2    100.11     1                                                 
+139LAF G FLAG=AB                                                                
+139LA  L     1920.5 4(7/2+)                                                     
+139LA  B             0.00013 5           9.77    17                             
+139LAS B EAV=116.93 92                                                          
+139LA  G 1754.5     50.02     1                                              C  
+139LA  G 1920.6     40.030   14                                                 
+139LAF G FLAG=D                                                                 
+139LA  L     1963.310(5/2)+                                                     
+139LA  B             0.00005  3              10.0 3                             
+139LAS B EAV=102.76 96                                                          
+139LA  G 1797.4    100.02     1                                                 
+139LAF G FLAG=AB                                                                
+139LA  L     2060.2 4                                                           
+139LA  B             0.00007 3           9.43    19                             
+139LAS B EAV=71.89 86                                                           
+139LA  G 1894.7     70.008   6                                               C  
+139LAF G FLAG=D                                                                 
+139LA  G 2060.1     40.019   9                                                  
+139LAF G FLAG=D                                                                 
+

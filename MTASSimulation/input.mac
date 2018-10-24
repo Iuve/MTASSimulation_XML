@@ -1,0 +1,14 @@
+/control/verbose 0
+/run/verbose 0
+/process/verbose 0
+/tracking/verbose 0
+/vis/verbose 0
+/event/verbose 0
+/material/verbose 0
+
+/random/resetEngineFrom currentEvent.rndm
+/random/setSavingFlag true
+
+#/gun/particle gamma
+#/gun/energy 1000.00 keV
+/run/beamOn 20

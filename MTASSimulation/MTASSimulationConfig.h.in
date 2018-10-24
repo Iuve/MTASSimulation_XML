@@ -1,0 +1,4 @@
+// the configuration options and stttings fo MTASSimulation
+// to be process by CMAKE in precompilation
+#define MTASSimulation_VERSION_MAJOR @MTASSimulation_VERSION_MAJOR@
+#define MTASSimulation_VERSION_MINOR @MTASSimulation_VERSION_MINOR@
