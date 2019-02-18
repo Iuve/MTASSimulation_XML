@@ -17,8 +17,7 @@ public:
 	
 	double GetLevelEnergy(){return levelEnergy_;}
 	std::vector<Transition>* GetTransitions(){return &transitions_;}
-//	double GetHalfLifeTime(){return halfLifeTime_;}
-	bool IfEmissionFromLevel(double);
+	double GetHalfLifeTime(){return halfLifeTimeInSeconds_;}
 	
 
 private:

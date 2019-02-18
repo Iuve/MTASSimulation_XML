@@ -10,8 +10,6 @@
 #include "Globals.hh"
 
 #include <vector>
-//#include <cstdlib>
-//#include <ctime>
 #include <iostream>
 
 
@@ -23,6 +21,7 @@ Decay::Decay()
 	startLevel_ = loadDecayData_->GetStartLevel();
 	stopLevel_ = loadDecayData_->GetStopLevel();
 	isomerLevel_ = 0L;
+	eventTimeInSeconds_ = 0.;
 }
 
 
@@ -32,8 +31,6 @@ Decay::~Decay()
 		delete loadDecayData_;
 }
 
- 
-
 std::vector<Event> Decay::GenerateEventList() 
 {
 	if( !eventList_.empty() )
@@ -41,11 +38,17 @@ std::vector<Event> Decay::GenerateEventList()
 	Level* currentLevel;
 
 	if(isomerLevel_ == 0L) //there is not "lefted" isomer from previous decay
+	{
 		currentLevel = startLevel_;
+		FindEventTime(currentLevel);
+	}
 	else
 	{
-		if(!isomerLevel_->IfEmissionFromLevel(g_cycleDurationInSeconds))
+		if(!IfEmissionFromLevel(isomerLevel_, g_cycleDurationInSeconds - eventTimeInSeconds_))
+		{
+			eventTimeInSeconds_ = 0.; // end of event, no further transitions, zero time
 			return eventList_;
+		}
 		currentLevel = isomerLevel_;
 		isomerLevel_ = 0L;
 	}
@@ -54,23 +57,54 @@ std::vector<Event> Decay::GenerateEventList()
 	std::vector<Transition>* transitionsForCheck;
 	transitionsForCheck = ( currentLevel->GetTransitions() );
 
-	while ( transitionsForCheck->size() && currentLevel != stopLevel_) // pusty wektor z Transitions, STOP lub T1/2 jako globalna zmienna
+	while ( transitionsForCheck->size() && currentLevel != stopLevel_) // empty Transitions or STOP level
 	{
 		nextLevel = FindTransition(currentLevel);
 		currentLevel = nextLevel;
 		
-		if(!currentLevel->IfEmissionFromLevel(g_eventInSeconds))
+		if(!IfEmissionFromLevel(currentLevel, g_eventInSeconds))
 		{
 			isomerLevel_ = currentLevel;
+			eventTimeInSeconds_ += g_eventInSeconds;
+			
 			if (isomerLevel_ == stopLevel_)
 			{
+				eventTimeInSeconds_ = 0.;
 				isomerLevel_ = 0L;
 			}
 			break;	
 		}
 		transitionsForCheck = ( currentLevel->GetTransitions() );
 	};
+	
+	if(isomerLevel_ == 0L)
+		eventTimeInSeconds_ = 0.;
+		
 	return eventList_;	
+}
+
+void Decay::FindEventTime(Level* level)
+{
+	double T12 = level->GetHalfLifeTime(); // in seconds
+	double lambda = log(2.)/T12;
+	double emissionProbability = 1. - exp(-lambda * g_cycleDurationInSeconds);
+	double pseudoRandomProbability = G4UniformRand() * emissionProbability;
+	eventTimeInSeconds_ = -log(1. - pseudoRandomProbability) / lambda;
+}
+
+bool Decay::IfEmissionFromLevel(Level* level, double timeGate) // Poisson distribution
+{
+	double T12 = level->GetHalfLifeTime(); // in seconds
+	double lambda = log(2.)/T12;
+	double emissionProbability = 1. - exp(-lambda * timeGate);
+	double randomNumber = G4UniformRand();
+	if (randomNumber <= emissionProbability)
+	{
+		eventTimeInSeconds_ += -log(1. - randomNumber * emissionProbability) / lambda;
+		return true;
+	}
+	else
+		return false;
 }
 
 Level* Decay::FindTransition(Level* fromLevel) // fromLevel ???
@@ -125,5 +159,7 @@ void Decay::AddEvent (std::string particleType, double energy, FermiDistribution
 		//eventList_.push_back(Event(energy, "neutron"));
 	}
 }
+
+
 
 Level* Decay::isomerLevel_ = 0L;

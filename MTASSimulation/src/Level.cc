@@ -30,24 +30,3 @@ void Level::CalculateTotalProbability()
 	}
 
 }
-
-/*bool Level::IsIsomerLevel()
-{
-	/**Time limit for isomer state, if time of life is higher than the limit
-	level is treated as an isomer state**/
-/*	const double timeLimitInSec = 2.;//What is good value?
-	if (halfLifeTimeInSeconds_ > timeLimitInSec)
-		return true;
-	else
-		return false;
-} */
-
-bool Level::IfEmissionFromLevel(double timeGate) // Poisson distribution
-{
-	double lambda = log(2.)/halfLifeTimeInSeconds_;
-	double emissionProbability = 1. - exp(-lambda * timeGate);
-	if (G4UniformRand() <= emissionProbability)
-		return true;
-	else
-		return false;
-}

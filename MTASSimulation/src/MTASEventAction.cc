@@ -65,11 +65,6 @@ void MTASEventAction::EndOfEventAction(const G4Event* evt)
 	G4HCofThisEvent* HCE = evt->GetHCofThisEvent();
 	if(!HCE) return;
 
-// ponizej nie wykonuje sie jezeli zmienna = true
-
-//if(!MTASSteppingAction::nCaptureFactor)
-//{
-
 //sensitives detectors
 	G4THitsMap<G4double>* evtMapOuter = (G4THitsMap<G4double>*)(HCE->GetHC(colIDSumOuter));
 	G4THitsMap<G4double>* evtMapCenter = (G4THitsMap<G4double>*)(HCE->GetHC(colIDSumCenter));
@@ -134,10 +129,6 @@ void MTASEventAction::EndOfEventAction(const G4Event* evt)
   	
 	m_AnalysisManager->AddLight1(event_id , sumLight, MTASSteppingAction::lightProdInNaIMod);
   	m_AnalysisManager->AddLight2(event_id , sumLight, MTASSteppingAction::lightProdInNaIMod);	
-  	
-// tutaj koniec warunku i czyszczenie zmiennej statycznej = false
-//}
-//	MTASSteppingAction::nCaptureFactor = false;
 	
   	for(int i=0; i<19; i++)
   		MTASSteppingAction::lightProdInNaIMod[i] = 0;	

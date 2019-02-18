@@ -47,7 +47,10 @@ private:
 	std::vector<Event> eventList_;
 	LoadDecayData* loadDecayData_;
 	static Level* isomerLevel_;
-
+	double eventTimeInSeconds_;
+	
+	void FindEventTime(Level*);
+	bool IfEmissionFromLevel(Level*, double);
 };
 
 #endif	/* DECAY_H */
