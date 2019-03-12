@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Nuclide AtomicNumber="50" AtomicMass="120" QBeta="4000.0">
+	<Level Energy="0.0" Spin="0" Parity="+" HalfLifeTime="0.28" TimeUnit="S">
+		<Transition Type="B-" TransitionQValue="200.0" Intensity="1.0">
+			<TargetLevel Energy="3800.0" AtomicNumber="51" AtomicMass="120"/>
+		</Transition>
+	</Level>
+</Nuclide>

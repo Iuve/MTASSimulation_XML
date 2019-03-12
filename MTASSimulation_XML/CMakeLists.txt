@@ -58,8 +58,8 @@ file(GLOB headers ${PROJECT_SOURCE_DIR}/include/*.hh)
 # Add the executable, and link it to the Geant4 libraries
 #
 #echo ${ROOT_LIBRARIES}
-add_executable(MTASSimulation MTASSimulation.cc ${sources} ${headers})
-target_link_libraries(MTASSimulation 
+add_executable(MTASSimulation_XML MTASSimulation_XML.cc ${sources} ${headers})
+target_link_libraries(MTASSimulation_XML 
 	${Geant4_LIBRARIES}
 	${ROOT_LIBRARIES}
 	)
@@ -85,6 +85,6 @@ endforeach()
 #----------------------------------------------------------------------------
 # Install the executable to 'bin' directory under CMAKE_INSTALL_PREFIX
 #
-install(TARGETS MTASSimulation DESTINATION bin)
+install(TARGETS MTASSimulation_XML DESTINATION bin)
 
 

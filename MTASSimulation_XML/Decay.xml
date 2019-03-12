@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<NuclideFile FileName="50X120.xml"/>
+<NuclideFile FileName="51X119.xml"/>
+<NuclideFile FileName="51X120.xml"/>
+<StartLevel AtomicNumber="50" AtomicMass="120" Energy="0.0"/>
+<StopLevel AtomicNumber="51" AtomicMass="119" Energy="0.0"/>
