@@ -17,7 +17,9 @@
 #include "TFile.h"
 #include "TNtuple.h"
 
+#include "G4LogicalVolume.hh"
 #include "globals.hh"
+
 class MTASAnalysisManager
 {
 public:

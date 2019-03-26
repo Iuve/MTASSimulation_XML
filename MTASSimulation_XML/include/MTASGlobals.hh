@@ -1,4 +1,4 @@
-/*! \file Globals.hh
+/*! \file MTASGlobals.hh
   \brief constant parameters used in MTASSimulation
   
 */

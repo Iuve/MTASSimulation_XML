@@ -5,7 +5,7 @@
 #include "G4StepPoint.hh"
 #include "G4Track.hh"
 #include "G4UserSteppingAction.hh"
-#include "Globals.hh"
+#include "MTASGlobals.hh"
 #include "G4RunManager.hh"
 
 #include "G4LogicalVolume.hh"

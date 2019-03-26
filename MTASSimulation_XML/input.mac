@@ -9,6 +9,6 @@
 /random/resetEngineFrom currentEvent.rndm
 /random/setSavingFlag true
 
-#/gun/particle gamma
-#/gun/energy 1000.00 keV
+/gun/particle gamma
+/gun/energy 1000.00 keV
 /run/beamOn 100000

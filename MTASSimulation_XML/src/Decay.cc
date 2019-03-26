@@ -7,7 +7,7 @@
 #include "FermiDistribution.hh"
 #include "G4ParticleTable.hh"
 #include "Randomize.hh"
-#include "Globals.hh"
+#include "MTASGlobals.hh"
 
 #include <vector>
 #include <iostream>
