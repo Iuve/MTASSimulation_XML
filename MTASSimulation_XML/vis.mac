@@ -67,6 +67,6 @@
 #/gun/particle neutron
 
 # TEST
-/gun/energy 1000.00 keV
-/tracking/verbose 0
-/run/beamOn 10000
+#/gun/energy 1000.00 keV
+#/tracking/verbose 0
+#/run/beamOn 10000
