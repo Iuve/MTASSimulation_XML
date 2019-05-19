@@ -19,7 +19,7 @@ public:
 	//static const int numberOfShellIndexes_ = 4;
 	//Transition(std::string type, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber);
 	Transition(std::string type, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber, 
-	FermiDistribution* betaEnergyDistribution);
+	FermiDistribution* betaEnergyDistribution, double electronConversionCoefficient = 0.);
 	Transition(std::string type, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber,
 	int atomicNumber, double electronConversionCoefficient = 0.);
 	
@@ -39,6 +39,7 @@ public:
 	Level* GetPointerToFinalLevel(){return pointerToFinalLevel_;}
 	// for beta purposes
 	FermiDistribution* GetBetaEnergyDistribution(){return betaEnergyDistribution_;}
+	std::vector<Event> FindBetaPlusEvents();
 	// for gamma purposes
 	double GetElectronConversionCoefficient(){return electronConversionCoefficient_;}
 	void FindICEvent(std::vector<Event> &decay);
@@ -58,6 +59,7 @@ private:
 	
 	//for beta purposes
 	FermiDistribution* betaEnergyDistribution_;
+	bool IsBetaPlusDecay();
 	
 	//for gamma purposes
 	static const int numberOfShellIndexes_ = 4;

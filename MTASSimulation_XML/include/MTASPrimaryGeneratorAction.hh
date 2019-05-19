@@ -10,6 +10,8 @@
 #include "G4ParticleGun.hh"
 #include <vector>
 
+static bool g_decaySimulationStatus(false);
+
 
 class MTASPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {

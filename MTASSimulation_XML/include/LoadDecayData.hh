@@ -7,6 +7,8 @@
 #include <vector>
 #include <string>
 
+static std::string g_xmlInputFileName;
+
 class Nuclide;
 class Level;
 

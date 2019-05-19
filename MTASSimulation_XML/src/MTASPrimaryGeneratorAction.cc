@@ -12,7 +12,6 @@
 #include "G4SystemOfUnits.hh"
 #include "G4UnitsTable.hh"
 
-static bool g_decaySimulationStatus(false);
 void SetDecaySimulationStatus(bool status) {g_decaySimulationStatus = status;}
 
 MTASPrimaryGeneratorAction::MTASPrimaryGeneratorAction( MTASDetectorConstruction* theDetectorConstruction)
@@ -205,7 +204,14 @@ void MTASPrimaryGeneratorAction::GeneratePrimaries( G4Event* anEvent )
 void MTASPrimaryGeneratorAction::GenerateDecay( G4Event* anEvent )
 {
 		//Position
-	G4ThreeVector startPos( 0.0*cm, 0.0*mm, 0.0*cm );
+	//G4ThreeVector startPos( 17.6*cm, 8.8*cm, 0.0*cm );
+	G4ThreeVector startPos( 0.0*cm, 0.0*cm, 0.0*cm );
+	
+	//double randX = 80*G4UniformRand() - 40;
+	//double randY = 80*G4UniformRand() - 40;
+	//double randZ = 50*G4UniformRand() - 25;
+	
+	//G4ThreeVector startPos( randX*cm, randY*mm, randZ*cm );
 	
 	//Direction
 	G4ThreeVector direction( 1.0, 0.0, 0.0 );

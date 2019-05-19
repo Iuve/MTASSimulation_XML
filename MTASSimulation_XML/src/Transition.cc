@@ -2,6 +2,7 @@
 #include "Transition.hh"
 #include "FermiDistribution.hh"
 
+#include "Beta.hh"
 #include "Decay.hh"
 #include "Exception.hh"
 #include "globals.hh"
@@ -25,10 +26,15 @@ atomicNumber_(atomicNumber), electronConversionCoefficient_(electronConversionCo
 	InitializeShellNumbers();
 }
 
-Transition::Transition(std::string particleType, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber, FermiDistribution* betaEnergyDistribution):
-particleType_(particleType), transitionQValue_(transitionQValue), intensity_(intensity), finalLevelEnergy_(finalLevelEnergy), finalLevelAtomicMass_(finalLevelAtomicMass), finalLevelAtomicNumber_(finalLevelAtomicNumber), betaEnergyDistribution_(betaEnergyDistribution)
+Transition::Transition(std::string particleType, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, 
+int finalLevelAtomicNumber, FermiDistribution* betaEnergyDistribution, double electronConversionCoefficient):
+particleType_(particleType), transitionQValue_(transitionQValue), intensity_(intensity), finalLevelEnergy_(finalLevelEnergy), 
+finalLevelAtomicMass_(finalLevelAtomicMass), finalLevelAtomicNumber_(finalLevelAtomicNumber), 
+betaEnergyDistribution_(betaEnergyDistribution), electronConversionCoefficient_(electronConversionCoefficient)
 {
-	
+	atomicTransitionManager_ = G4AtomicTransitionManager::Instance();
+	atomicTransitionManager_->Initialise();
+	InitializeShellNumbers();
 }
 
 Transition::~Transition()
@@ -46,17 +52,34 @@ void Transition::InitializeShellNumbers()
 
 void Transition::SetShellElectronConvCoef(string type, double value)
 {
-    if(type == "KC" || type == "KC+" )
-			for(int i=0; i<numberOfShellIndexes_; i++)
-	    	shellElectonConvCoeff_[i] +=value;
-    else if (type == "LC" || type == "LC+" )
-			for(int i=1; i<numberOfShellIndexes_; i++)
-	    	shellElectonConvCoeff_[i] +=value;
-    else if (type == "MC" || type == "MC+" )
-			for(int i=2; i<numberOfShellIndexes_; i++)
-	    	shellElectonConvCoeff_[i] +=value;
-    else
-			shellElectonConvCoeff_[3] +=value;
+	if(particleType_ == "G")
+	{
+		if(type == "KC" || type == "KC+" )
+				for(int i=0; i<numberOfShellIndexes_; i++)
+				shellElectonConvCoeff_[i] +=value;
+		else if (type == "LC" || type == "LC+" )
+				for(int i=1; i<numberOfShellIndexes_; i++)
+				shellElectonConvCoeff_[i] +=value;
+		else if (type == "MC" || type == "MC+" )
+				for(int i=2; i<numberOfShellIndexes_; i++)
+				shellElectonConvCoeff_[i] +=value;
+		else
+				shellElectonConvCoeff_[3] +=value;
+	}
+	else if(particleType_ == "B+")
+	{
+		if(type == "CK" || type == "CK+" )
+				for(int i=0; i<numberOfShellIndexes_; i++)
+				shellElectonConvCoeff_[i] +=value;
+		else if (type == "CL" || type == "CL+" )
+				for(int i=1; i<numberOfShellIndexes_; i++)
+				shellElectonConvCoeff_[i] +=value;
+		else if (type == "CM" || type == "CM+" )
+				for(int i=2; i<numberOfShellIndexes_; i++)
+				shellElectonConvCoeff_[i] +=value;
+		else
+				shellElectonConvCoeff_[3] +=value;
+	}
 }
 
 std::vector<Event> Transition::FindGammaEvents()
@@ -81,49 +104,84 @@ bool Transition::IsGammaDecay()
     return false;	
 }
 
-void Transition::FindICEvent(std::vector<Event> &gammaDecay)
+std::vector<Event> Transition::FindBetaPlusEvents()
+{
+	atomicNumber_ = finalLevelAtomicNumber_; //for B+ purpose
+	
+	std::vector<Event> betaPlusDecay;
+	if(IsBetaPlusDecay())
+	{
+		Beta temp(transitionQValue_, 1, betaEnergyDistribution_);
+		betaPlusDecay = temp.GetBetaEvents();	
+	}
+	else //EC
+	{
+		FindICEvent(betaPlusDecay);
+	}
+	return betaPlusDecay;
+}
+
+// electronConversionCoefficient_ has different meaning in case of Beta+ decay;
+// actually it is: electronConversionCoefficient_ = EC intensity,
+// and intensity_ = EC intensity + B+ intensity
+bool Transition::IsBetaPlusDecay()
+{
+    double randomNumber = G4UniformRand() * intensity_;
+    if(randomNumber < (intensity_ - electronConversionCoefficient_) )
+		return true;
+    return false;	
+}
+
+void Transition::FindICEvent(std::vector<Event> &eventList)
 {
 	int primaryShellIndex = FindPrimaryShellIndex();
 	int primaryVacancies = shellNumbers_[primaryShellIndex];
-//	std::cout << "primaryVacancies: " << primaryVacancies << endl;
+	//std::cout << "primaryVacancies: " << primaryVacancies << endl;
 	if(!IsRadiativeTransitionReachableShell(primaryVacancies))
 		if(!IsAugerReachableShell(primaryVacancies))
-			return FindICEvent(gammaDecay);
+		{
+			//std::cout << "Not reachable!" << std::endl;
+			return FindICEvent(eventList);
+		}
+
 
 	if(IsRadiativeTransitionReachableShell(primaryVacancies))
 	{
-//		std::cout << "Radiative Transition Reachable" << endl;
+		//std::cout << "Radiative Transition Reachable" << endl;
 		if(IsAugerReachableShell(primaryVacancies))
 		{
-//			std::cout << "RTR: Auger Reachable" << endl;
+			//std::cout << "RTR: Auger Reachable" << endl;
 			double totalRadTransitProb = atomicTransitionManager_->
 				TotalRadiativeTransitionProbability(atomicNumber_, primaryVacancies);
 			if(G4UniformRand()<totalRadTransitProb)
 			{
-//				std::cout << "RTR: Auger Reachable: Add X" << endl;
-				AddXRaysEvent(gammaDecay, primaryVacancies);
+				//std::cout << "RTR: Auger Reachable: Add X" << endl;
+				AddXRaysEvent(eventList, primaryVacancies);
 			}
 			else
 			{
-//				std::cout << "RTR: Auger Reachable: Add Auger" << endl;
-				AddAugerEvent(gammaDecay, primaryVacancies);
+				//std::cout << "RTR: Auger Reachable: Add Auger" << endl;
+				AddAugerEvent(eventList, primaryVacancies);
 			}	
 		}
 		else
 		{
-//			std::cout << "RTR: Auger NOT Reachable" << endl;
-			AddXRaysEvent(gammaDecay, primaryVacancies);
+			//std::cout << "RTR: Auger NOT Reachable" << endl;
+			AddXRaysEvent(eventList, primaryVacancies);
 		}
 	}
 	else //if(IsAugerReachableShell(primaryVacancies))
 	{
-//		std::cout << "Radiative Transition NOT Reachable" << endl;
-		AddAugerEvent(gammaDecay, primaryVacancies);
+		//std::cout << "Radiative Transition NOT Reachable" << endl;
+		AddAugerEvent(eventList, primaryVacancies);
 	}
-
-	double primaryBindingEnergy = 
-	G4AtomicShells::GetBindingEnergy(atomicNumber_, primaryVacancies) / keV;
-	gammaDecay.push_back(Event(transitionQValue_-primaryBindingEnergy, G4ParticleTable::GetParticleTable()->FindParticle("e-")));
+	
+	if (particleType_ == "G")
+	{
+		double primaryBindingEnergy = 
+		G4AtomicShells::GetBindingEnergy(atomicNumber_, primaryVacancies) / keV;
+		eventList.push_back(Event(transitionQValue_-primaryBindingEnergy, G4ParticleTable::GetParticleTable()->FindParticle("e-")));
+	}
 }
 
 int Transition::FindPrimaryShellIndex()

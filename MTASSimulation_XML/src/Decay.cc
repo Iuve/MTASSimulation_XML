@@ -44,13 +44,17 @@ std::vector<Event> Decay::GenerateEventList()
 	}
 	else
 	{
-		if(!IfEmissionFromLevel(isomerLevel_, g_cycleDurationInSeconds - eventTimeInSeconds_))
-		{
-			eventTimeInSeconds_ = 0.; // end of event, no further transitions, zero time
-			return eventList_;
-		}
 		currentLevel = isomerLevel_;
 		isomerLevel_ = 0L;
+		
+		if(!IfEmissionFromLevel(currentLevel, g_cycleDurationInSeconds - eventTimeInSeconds_))
+		{
+			eventTimeInSeconds_ = 0.; // end of event, no further transitions, zero time
+			//eventList_ is always empty at this moment so new decay can be started here
+			
+			currentLevel = startLevel_; // new decay on behalf of "old" Geant4 event
+			FindEventTime(currentLevel);
+		}
 	}
 
 	Level* nextLevel;
@@ -59,7 +63,7 @@ std::vector<Event> Decay::GenerateEventList()
 
 	while ( transitionsForCheck->size() && currentLevel != stopLevel_) // empty Transitions or STOP level
 	{
-		nextLevel = FindTransition(currentLevel);
+		nextLevel = FindTransition(currentLevel); // adding events to list in this line
 		currentLevel = nextLevel;
 		
 		if(!IfEmissionFromLevel(currentLevel, g_eventInSeconds))
@@ -79,22 +83,29 @@ std::vector<Event> Decay::GenerateEventList()
 	
 	if(isomerLevel_ == 0L)
 		eventTimeInSeconds_ = 0.;
-		
+	
 	return eventList_;	
 }
 
 void Decay::FindEventTime(Level* level)
 {
 	double T12 = level->GetHalfLifeTime(); // in seconds
-	double lambda = log(2.)/T12;
-	double emissionProbability = 1. - exp(-lambda * g_cycleDurationInSeconds);
-	double pseudoRandomProbability = G4UniformRand() * emissionProbability;
-	eventTimeInSeconds_ = -log(1. - pseudoRandomProbability) / lambda;
+	if(T12 <= 0.)
+		eventTimeInSeconds_ = 0.;
+	else
+	{
+		double lambda = log(2.)/T12;
+		double emissionProbability = 1. - exp(-lambda * g_cycleDurationInSeconds);
+		double pseudoRandomProbability = G4UniformRand() * emissionProbability;
+		eventTimeInSeconds_ = -log(1. - pseudoRandomProbability) / lambda;
+	}
 }
 
 bool Decay::IfEmissionFromLevel(Level* level, double timeGate) // Poisson distribution
 {
 	double T12 = level->GetHalfLifeTime(); // in seconds
+	if(T12 <= 0.)
+		return true;
 	double lambda = log(2.)/T12;
 	double emissionProbability = 1. - exp(-lambda * timeGate);
 	double randomNumber = G4UniformRand();
@@ -120,6 +131,11 @@ Level* Decay::FindTransition(Level* fromLevel) // fromLevel ???
 				std::vector<Event> gammaICEvents = it->FindGammaEvents();
 				eventList_.insert(eventList_.end(), gammaICEvents.begin(), gammaICEvents.end());
 			}
+			else if ( it->GetParticleType() == "B+" && it->GetElectronConversionCoefficient() > 0.)
+			{
+				std::vector<Event> betaPlusEvents = it->FindBetaPlusEvents();
+				eventList_.insert(eventList_.end(), betaPlusEvents.begin(), betaPlusEvents.end());
+			}
 			else
 				AddEvent(it->GetParticleType(), it->GetTransitionQValue(), it->GetBetaEnergyDistribution());
 			return it->GetPointerToFinalLevel();
@@ -143,8 +159,7 @@ void Decay::AddEvent (std::string particleType, double energy, FermiDistribution
 	{
 		Beta temp(energy, 1, betaEnergyDistribution);
 		std::vector<Event> betaEvents = temp.GetBetaEvents();
-		eventList_.insert(eventList_.end(), betaEvents.begin(), betaEvents.end());
-//		eventList_.push_back(temp->GetBetaEvents());
+		eventList_.insert(eventList_.end(), betaEvents.begin(), betaEvents.end()); 
 	}
 	if(particleType == "G") 
 	{

@@ -9,7 +9,6 @@
 #include <vector>
 #include <string>
 
-static std::string g_xmlInputFileName;
 void SetXmlInputFileName(std::string xmlFileName) {g_xmlInputFileName = xmlFileName;}
 
 const double energyLevelUncertanity(3.); // used in FindPointerToLevel
@@ -82,7 +81,7 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 {	
 	std::vector<Level> nuclideLevels;
 	pugi::xml_document doc;
-    if (!doc.load_file(filename.c_str())) cout << "Error connected to other xml file." << endl; // Exception
+    if (!doc.load_file(filename.c_str())) cout << "Error connected to " << filename << " file." << endl; // Exception
 
     pugi::xml_node nuclide = doc.child("Nuclide");
     int atNumber = nuclide.attribute("AtomicNumber").as_int();
@@ -103,45 +102,58 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 						
 			if(type == "B+")
 			{
-				FermiDistribution* temp = new FermiDistribution(atNumber, transitionQval, 1);
-				transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber, temp));
-//				delete temp;
+				FermiDistribution* fermiDist = new FermiDistribution(atNumber, transitionQval, 1);
+				
+				pugi::xml_attribute attr = transition.attribute("ElectronConversionCoefficient");
+				if(attr = attr.next_attribute())
+				{
+					//in B+ case eCC is actually EC intensity
+					double eCC = transition.attribute("ElectronConversionCoefficient").as_double();
+					Transition tempTransition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, 
+					finalLvlAtNumber, fermiDist, eCC);
+						
+					for (attr; attr; attr = attr.next_attribute())
+					{
+						double value;
+						istringstream( attr.value() ) >> value;
+						tempTransition.SetShellElectronConvCoef(attr.name(), value);
+					}
+					transitionsFromLvL.push_back(tempTransition);
+				}
+				else transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber, fermiDist));
 			}
 			else if(type == "B-")
 			{
-				FermiDistribution* temp = new FermiDistribution(atNumber, transitionQval, -1);
-				transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber, temp));
+				FermiDistribution* fermiDist = new FermiDistribution(atNumber, transitionQval, -1);
+				transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber, fermiDist));
 //				delete temp;
 			}
-			else
+			else if(type == "G")
 			{
-				if(type == "G")
+				pugi::xml_attribute attr = transition.attribute("ElectronConversionCoefficient");
+				if(attr = attr.next_attribute())
 				{
-					pugi::xml_attribute attr = transition.attribute("ElectronConversionCoefficient");
-					if(attr = attr.next_attribute())
+					//double shellElectonConvCoeff[numberOfShellIndexes_];
+					double eCC = transition.attribute("ElectronConversionCoefficient").as_double(); // eCC == ElectronConversionCoefficient
+					Transition tempTransition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, 
+					finalLvlAtNumber, atNumber, eCC);
+						
+					for (attr; attr; attr = attr.next_attribute())
 					{
-						//double shellElectonConvCoeff[numberOfShellIndexes_];
-						double eCC = transition.attribute("ElectronConversionCoefficient").as_double(); // eCC == ElectronConversionCoefficient
-						Transition tempTransition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, 
-						finalLvlAtNumber, atNumber, eCC);
-						
-						for (attr; attr; attr = attr.next_attribute())
-						{
-							double value;
-							istringstream( attr.value() ) >> value;
-							tempTransition.SetShellElectronConvCoef(attr.name(), value);
-							//SetShellElectronConvCoef(attr.name(), value, shellElectonConvCoeff);
-						}
-						//cout << "ElectronConversionCoefficient: " << eCC << endl;
-						transitionsFromLvL.push_back(tempTransition);
-						
+						double value;
+						istringstream( attr.value() ) >> value;
+						tempTransition.SetShellElectronConvCoef(attr.name(), value);
+						//SetShellElectronConvCoef(attr.name(), value, shellElectonConvCoeff);
 					}
-					else transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, 
-					finalLvlAtNumber, atNumber));
+					//cout << "ElectronConversionCoefficient: " << eCC << endl;
+					transitionsFromLvL.push_back(tempTransition);
+						
 				}
-				else
-					transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber, atNumber));
-			}		
+				else transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, 
+				finalLvlAtNumber, atNumber));
+			}
+			else
+				transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber, atNumber));		
 		}
 		double lvlEnergy = level.attribute("Energy").as_double();
 		double lvlSpin = level.attribute("Spin").as_double();
@@ -190,10 +202,32 @@ Level* LoadDecayData::FindPointerToLevel(int atomicNumber, int atomicMass, doubl
 				double temp = jt->GetLevelEnergy();
 				if( ((temp - energyLvlUnc) <= energy) && ((temp + energyLvlUnc) >= energy) )
 					return &(*jt);
-			}
+			} 
 	}
+	
 	// throw Exception
 	cout << "Level not found!" << endl;
+	cout << atomicMass << " " << atomicNumber << " " << energy << endl;
+	
+		// additional security
+	for ( auto it = allNuclides_.begin(); it != allNuclides_.end(); ++it )
+	{
+		int atNumber = it->GetAtomicNumber();
+		int atMass = it->GetAtomicMass();
+		if(atomicNumber == atNumber && atomicMass == atMass)								
+			for ( int i = 10; i < 51; i += 10)
+			{
+				for ( auto jt = it->GetNuclideLevels()->begin(); jt != it->GetNuclideLevels()->end(); ++jt )
+				{
+					double temp = jt->GetLevelEnergy();
+					if( ((temp - i) <= energy) && ((temp + i) >= energy) )
+						return &(*jt);
+				}
+			}
+	}
+	
+	// throw Exception
+	cout << "Level STILL not found!" << endl;
 	cout << atomicMass << " " << atomicNumber << " " << energy << endl;
 }
 
