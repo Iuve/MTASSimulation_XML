@@ -43,14 +43,14 @@ void MTASPrimaryGeneratorAction::SetUp( void )
   m_ParticleGun = new G4ParticleGun( n_particle );
 
   G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-  G4ParticleDefinition* gammaPD = particleTable->FindParticle("gamma");
+  //G4ParticleDefinition* gammaPD = particleTable->FindParticle("gamma");
   //G4ParticleDefinition* neutronPD = particleTable->FindParticle("neutron");
   //G4ParticleDefinition* electronPD = particleTable->FindParticle("e-");
 
 
   //m_ParticleGun->SetParticleDefinition(neutronPD);
-  m_ParticleGun->SetParticleDefinition(gammaPD);
-  m_ParticleGun->SetParticleEnergy( 1000.0 * keV );
+  //m_ParticleGun->SetParticleDefinition(gammaPD);
+  //m_ParticleGun->SetParticleEnergy( 1000.0 * keV );
   m_ParticleGun->SetParticlePosition(G4ThreeVector(0.*cm,0.*cm,0.*cm));
   m_ParticleGun->SetParticleMomentumDirection(G4ThreeVector(0.,0.,1.));
 

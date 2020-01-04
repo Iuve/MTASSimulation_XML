@@ -39,11 +39,25 @@ void MTASSteppingAction::UserSteppingAction(const G4Step* theStep)
 	G4Track* track = theStep->GetTrack();
 	G4double globalTime = track -> GetGlobalTime();
 	
+	//Get first in event interaction time (in nanoseconds) and process
+	/*const G4String& processName = theStep->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
+	G4int trackID = track->GetTrackID();
+	
+	if( processName != "Transportation" && trackID == 1)
+	{
+		//std::cout << globalTime << " " << globalTime / ns << " " << globalTime / s << " " << processName << std::endl;
+		std::cout << globalTime << " " << processName << std::endl;
+		track->SetTrackStatus(fStopAndKill);
+	}
+	*/
+	
+	
 	if(globalTime / s > g_eventInSeconds)
 		{
 		track->SetTrackStatus(fStopAndKill);
-//		G4cout << "Killing track, global time: " << globalTime << G4endl;
 		} 
+		
+		
 	 
 	if(materialName == "SodiumIodide")
 	{
