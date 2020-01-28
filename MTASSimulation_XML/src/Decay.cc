@@ -1,13 +1,8 @@
 
-#include "Decay.hh"
-#include "Beta.hh"
-#include "LoadDecayData.hh"
-#include "Level.hh"
-#include "Transition.hh"
-#include "FermiDistribution.hh"
+#include "DeclareHeaders.hh"
+
 #include "G4ParticleTable.hh"
 #include "Randomize.hh"
-#include "MTASGlobals.hh"
 
 #include <vector>
 #include <iostream>
@@ -58,7 +53,7 @@ std::vector<Event> Decay::GenerateEventList()
 	}
 
 	Level* nextLevel;
-	std::vector<Transition>* transitionsForCheck;
+	std::vector<Transition*>* transitionsForCheck;
 	transitionsForCheck = ( currentLevel->GetTransitions() );
 
 	while ( transitionsForCheck->size() && currentLevel != stopLevel_) // empty Transitions or STOP level
@@ -121,57 +116,57 @@ bool Decay::IfEmissionFromLevel(Level* level, double timeGate) // Poisson distri
 Level* Decay::FindTransition(Level* fromLevel) // fromLevel ???
 {
 	double randomNumber = G4UniformRand() * fromLevel->GetTotalIntensity();
+	std::vector<Transition*>* transitionsFromLevel = fromLevel->GetTransitions();
 	
-	for ( auto it = fromLevel->GetTransitions()->begin(); it != fromLevel->GetTransitions()->end(); ++it )
+	for ( int i = 0; i < transitionsFromLevel->size(); ++i)
 	{
-		if (randomNumber < it->GetRunningIntensity())
+		if (randomNumber < transitionsFromLevel->at(i)->GetRunningIntensity())
 		{
-			if ( it->GetParticleType() == "G" && it->GetElectronConversionCoefficient() > 0.)
-			{
-				std::vector<Event> gammaICEvents = it->FindGammaEvents();
-				eventList_.insert(eventList_.end(), gammaICEvents.begin(), gammaICEvents.end());
-			}
-			else if ( it->GetParticleType() == "B+" && it->GetElectronConversionCoefficient() > 0.)
-			{
-				std::vector<Event> betaPlusEvents = it->FindBetaPlusEvents();
-				eventList_.insert(eventList_.end(), betaPlusEvents.begin(), betaPlusEvents.end());
-			}
-			else
-				AddEvent(it->GetParticleType(), it->GetTransitionQValue(), it->GetBetaEnergyDistribution());
-			return it->GetPointerToFinalLevel();
+			AddEvent( transitionsFromLevel->at(i) );
+			return transitionsFromLevel->at(i)->GetPointerToFinalLevel();
 		}
 	}
+	std::cout << "Unsuccessful finding of next transition" << std::endl;
+	return fromLevel;
 } 
 
-void Decay::AddEvent (std::string particleType, double energy, FermiDistribution* betaEnergyDistribution)
+void Decay::AddEvent (Transition* drawnTransition)
 {
+	std::string particleType = drawnTransition->GetParticleType();
+	double energy = drawnTransition->GetTransitionQValue();
+	
 	if(particleType == "B-") 
 	{
-		Beta temp(energy, -1, betaEnergyDistribution); 	
-		std::vector<Event> betaEvents = temp.GetBetaEvents();
-
-		for(unsigned int i=0; i<betaEvents.size(); ++i)
-			{
-				eventList_.push_back(betaEvents.at(i));
-			}
+		std::vector<Event> betaEvents = drawnTransition->FindBetaEvent();
+		eventList_.insert(eventList_.end(), betaEvents.begin(), betaEvents.end()); 
 	}
 	if(particleType == "B+") 
 	{
-		Beta temp(energy, 1, betaEnergyDistribution);
-		std::vector<Event> betaEvents = temp.GetBetaEvents();
+		std::vector<Event> betaEvents = drawnTransition->FindBetaEvent();
 		eventList_.insert(eventList_.end(), betaEvents.begin(), betaEvents.end()); 
 	}
 	if(particleType == "G") 
 	{
-		G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
-		eventList_.push_back(Event(energy, particleTable->FindParticle("gamma")));
-		//eventList_.push_back(Event(energy, "gamma"));
+		if ( drawnTransition->GetElectronConversionCoefficient() == 0L) //do sprawdzenia czy dziala!!
+		{
+			G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+			eventList_.push_back(Event(energy, particleTable->FindParticle("gamma")));
+		}
+		else
+		{
+			std::vector<Event> gammaICEvents = drawnTransition->FindGammaEvents();
+			eventList_.insert(eventList_.end(), gammaICEvents.begin(), gammaICEvents.end());
+		}
 	}
 	if(particleType == "N") 
 	{
 		G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
 		eventList_.push_back(Event(energy, particleTable->FindParticle("neutron")));
-		//eventList_.push_back(Event(energy, "neutron"));
+	}
+	if(particleType == "A") 
+	{
+		G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+		eventList_.push_back(Event(energy, particleTable->FindParticle("alpha")));
 	}
 }
 

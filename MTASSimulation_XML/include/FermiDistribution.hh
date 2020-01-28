@@ -18,6 +18,7 @@ public:
      * eCharge - possible only +/- 1 value. +1 - beta plus, -1 - beta minus
      */
     FermiDistribution(int atomicNumber, double qVal, int eCharge);
+    FermiDistribution(){};
     virtual ~FermiDistribution();
 
     double GetRandomBetaEnergy();

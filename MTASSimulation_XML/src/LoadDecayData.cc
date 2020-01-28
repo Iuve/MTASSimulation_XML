@@ -1,15 +1,19 @@
 
+#include "DeclareHeaders.hh"
 
-#include "LoadDecayData.hh"
 #include "pugixml.hh"
-#include "FermiDistribution.hh"
 
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <string>
+
+std::string g_xmlInputFileName;
+double g_eventInSeconds;
+double g_cycleDurationInSeconds;
 
 void SetXmlInputFileName(std::string xmlFileName) {g_xmlInputFileName = xmlFileName;}
+void SetEventLength(double time) { g_eventInSeconds = time; }
+void SetCycleLength(double time) { g_cycleDurationInSeconds = time; }
 
 const double energyLevelUncertanity(3.); // used in FindPointerToLevel
 
@@ -63,6 +67,8 @@ void LoadDecayData::LoadDataFromXml()
 		allNuclides_.push_back(LoadNuclideData(nuclideFile.attribute("FileName").value()));
 	}
 	
+	SetPointersToTransitions();
+	
 	FindPointersToFinalLevels();
 	
 	int tempAtomicNumber = dir.child("StartLevel").attribute("AtomicNumber").as_int();
@@ -74,6 +80,37 @@ void LoadDecayData::LoadDataFromXml()
 	tempAtomicMass = dir.child("StopLevel").attribute("AtomicMass").as_int();
 	tempEnergy = dir.child("StopLevel").attribute("Energy").as_double();
 	stopLevel_ = FindPointerToLevel(tempAtomicNumber, tempAtomicMass, tempEnergy, energyLevelUncertanity);
+	
+	double tempTime = dir.child("EventLength").attribute("Value").as_double();
+	string tempTimeUnit = dir.child("EventLength").attribute("TimeUnit").value();
+	double tempTimeInSeconds = CalculateHalfLifeTimeInSeconds(tempTime, tempTimeUnit);
+	SetEventLength( tempTimeInSeconds );
+	
+	tempTime = dir.child("CycleLength").attribute("Value").as_double();
+	tempTimeUnit = dir.child("CycleLength").attribute("TimeUnit").value();
+	tempTimeInSeconds = CalculateHalfLifeTimeInSeconds(tempTime, tempTimeUnit);
+	SetCycleLength( tempTimeInSeconds );
+	
+	cout << "Event length set to " << g_eventInSeconds << " seconds." << endl;
+	cout << "Cycle length set to " << g_cycleDurationInSeconds << " seconds." << endl;
+	
+	if( !dir.child("SpecifyFirstTransition").empty() )
+	{
+		int nuclideAtomicNumber = dir.child("SpecifyFirstTransition").attribute("NuclideAtomicNumber").as_int();
+		int nuclideAtomicMass = dir.child("SpecifyFirstTransition").attribute("NuclideAtomicMass").as_int();
+		pugi::xml_node initialLevel = dir.child("SpecifyFirstTransition").child("InitialLevel");
+		double initialLevelEnergy = initialLevel.attribute("Energy").as_double();
+		pugi::xml_node specifyTransition = dir.child("SpecifyFirstTransition").child("SpecifyTransition");
+		string specifiedType = specifyTransition.attribute("Type").value();
+		double specifiedEnergy = specifyTransition.attribute("TransitionQValue").as_double();
+		
+		RecalculateIntensities(nuclideAtomicNumber, nuclideAtomicMass, initialLevelEnergy,
+		specifiedType, specifiedEnergy);
+		
+		
+		//if( !dir.child().empty)
+	}
+	
 }
 
 
@@ -86,11 +123,15 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
     pugi::xml_node nuclide = doc.child("Nuclide");
     int atNumber = nuclide.attribute("AtomicNumber").as_int();
 	int atMass = nuclide.attribute("AtomicMass").as_int();
-	double QBeta = nuclide.attribute("QBeta").as_double(); // not used atm
+	//double QBeta = nuclide.attribute("QBeta").as_double(); // not used atm
 	
     for (pugi::xml_node level = nuclide.first_child(); level; level = level.next_sibling())
     {       
-        std::vector<Transition> transitionsFromLvL;
+        std::vector<Gamma> gammasFromLvL;
+        std::vector<Beta> betasFromLvL;
+        std::vector<Neutron> neutronsFromLvL;
+        std::vector<Alpha> alphasFromLvL;
+        
         for (pugi::xml_node transition = level.first_child(); transition; transition = transition.next_sibling())
 		{									
 			string type = transition.attribute("Type").value();
@@ -100,7 +141,7 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 			int finalLvlAtMass = transition.child("TargetLevel").attribute("AtomicMass").as_int();
 			int finalLvlAtNumber = transition.child("TargetLevel").attribute("AtomicNumber").as_int();
 						
-			if(type == "B+")
+			/*if(type == "B+")
 			{
 				FermiDistribution* fermiDist = new FermiDistribution(atNumber, transitionQval, 1);
 				
@@ -121,39 +162,47 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 					transitionsFromLvL.push_back(tempTransition);
 				}
 				else transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber, fermiDist));
-			}
-			else if(type == "B-")
+			} */
+			if(type == "B-")
 			{
-				FermiDistribution* fermiDist = new FermiDistribution(atNumber, transitionQval, -1);
-				transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber, fermiDist));
-//				delete temp;
+				betasFromLvL.push_back(Beta(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber));
 			}
 			else if(type == "G")
 			{
-				pugi::xml_attribute attr = transition.attribute("ElectronConversionCoefficient");
-				if(attr = attr.next_attribute())
+				if( !transition.child("ElectronConversionCoefficient").empty() )
 				{
-					//double shellElectonConvCoeff[numberOfShellIndexes_];
-					double eCC = transition.attribute("ElectronConversionCoefficient").as_double(); // eCC == ElectronConversionCoefficient
-					Transition tempTransition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, 
-					finalLvlAtNumber, atNumber, eCC);
-						
-					for (attr; attr; attr = attr.next_attribute())
+					// eCC == ElectronConversionCoefficient
+					double eCC = transition.child("ElectronConversionCoefficient").attribute("Total").as_double(); 
+					Gamma gammaTransition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, 
+					finalLvlAtNumber, eCC, atNumber);
+					
+					for(pugi::xml_attribute attr: transition.child("ElectronConversionCoefficient").attributes())
 					{
 						double value;
 						istringstream( attr.value() ) >> value;
-						tempTransition.SetShellElectronConvCoef(attr.name(), value);
-						//SetShellElectronConvCoef(attr.name(), value, shellElectonConvCoeff);
+						cout << attr.name() << " " << value << endl;
+						gammaTransition.SetShellElectronConvCoef(attr.name(), value);
 					}
-					//cout << "ElectronConversionCoefficient: " << eCC << endl;
-					transitionsFromLvL.push_back(tempTransition);
-						
+
+					gammasFromLvL.push_back(gammaTransition);
 				}
-				else transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, 
-				finalLvlAtNumber, atNumber));
+				else
+				{
+					gammasFromLvL.push_back(Gamma(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber));
+				}
 			}
+			else if(type == "N")
+			{
+				neutronsFromLvL.push_back(Neutron(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber));
+			}
+			else if(type == "A")
+			{
+				alphasFromLvL.push_back(Alpha(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber));
+			}	
 			else
-				transitionsFromLvL.push_back(Transition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, finalLvlAtNumber, atNumber));		
+			{
+				cout << "Unknown particle type! Data not registered." << endl;
+			}		
 		}
 		double lvlEnergy = level.attribute("Energy").as_double();
 		double lvlSpin = level.attribute("Spin").as_double();
@@ -161,29 +210,63 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 		double lvlHalfLifeTime = level.attribute("HalfLifeTime").as_double();
 		string timeUnit = level.attribute("TimeUnit").value();
 		double lvlHalfLifeTimeInSeconds = CalculateHalfLifeTimeInSeconds(lvlHalfLifeTime, timeUnit);
-//		cout << "lvlHalfLifeTimeInSeconds = " << lvlHalfLifeTimeInSeconds << endl;
 		
-		nuclideLevels.push_back(Level(lvlEnergy, lvlSpin, lvlParity, lvlHalfLifeTimeInSeconds, transitionsFromLvL));
-    }   
+		nuclideLevels.push_back(Level(lvlEnergy, lvlSpin, lvlParity, lvlHalfLifeTimeInSeconds,
+		 gammasFromLvL, betasFromLvL, neutronsFromLvL, alphasFromLvL));
+    }
+    
+    cout << "Nuclide data uploaded successfully." << endl;
 	
 	return Nuclide(atNumber, atMass, nuclideLevels);
+}
+
+void LoadDecayData::SetPointersToTransitions()
+{
+	for ( auto it = allNuclides_.begin(); it != allNuclides_.end(); ++it )
+	{
+		for ( auto jt = it->GetNuclideLevels()->begin(); jt != it->GetNuclideLevels()->end(); ++jt )
+		{
+			std::vector<Transition*> pointersToTransitionsFromLvL;
+			for ( auto kt = jt->GetBetaTransitions()->begin(); kt != jt->GetBetaTransitions()->end(); ++kt )
+			{
+				Transition* pointerToBeta = &(*kt);
+				pointersToTransitionsFromLvL.push_back(pointerToBeta);
+			}
+			for ( auto kt = jt->GetGammaTransitions()->begin(); kt != jt->GetGammaTransitions()->end(); ++kt )
+			{
+				Transition* pointerToGamma = &(*kt);
+				pointersToTransitionsFromLvL.push_back(pointerToGamma);
+			}
+			for ( auto kt = jt->GetNeutronTransitions()->begin(); kt != jt->GetNeutronTransitions()->end(); ++kt )
+			{
+				Transition* pointerToNeutron = &(*kt);
+				pointersToTransitionsFromLvL.push_back(pointerToNeutron);
+			}
+			for ( auto kt = jt->GetAlphaTransitions()->begin(); kt != jt->GetAlphaTransitions()->end(); ++kt )
+			{
+				Transition* pointerToAlpha = &(*kt);
+				pointersToTransitionsFromLvL.push_back(pointerToAlpha);
+			}
+
+			jt->SetTransitions(pointersToTransitionsFromLvL);
+			jt->CalculateTotalProbability();
+		}
+	}
 }
 
 void LoadDecayData::FindPointersToFinalLevels()
 {
 	for ( auto it = allNuclides_.begin(); it != allNuclides_.end(); ++it )
 	{
-		int atNumber = it->GetAtomicNumber();
-		int atMass = it->GetAtomicMass();
 		for ( auto jt = it->GetNuclideLevels()->begin(); jt != it->GetNuclideLevels()->end(); ++jt )
 		{
 			for ( auto kt = jt->GetTransitions()->begin(); kt != jt->GetTransitions()->end(); ++kt )
 			{
-				string type = kt->GetParticleType();
+				string type = (*kt)->GetParticleType();
 				if(type == "G") // have to improve it
-					kt->SetPointerToFinalLevel( FindPointerToLevel( kt->GetFinalLevelAtomicNumber(), kt->GetFinalLevelAtomicMass(), kt->GetFinalLevelEnergy(), energyLevelUncertanity ) );
+					(*kt)->SetPointerToFinalLevel( FindPointerToLevel( (*kt)->GetFinalLevelAtomicNumber(), (*kt)->GetFinalLevelAtomicMass(), (*kt)->GetFinalLevelEnergy(), energyLevelUncertanity ) );
 				else
-					kt->SetPointerToFinalLevel( FindPointerToLevel( kt->GetFinalLevelAtomicNumber(), kt->GetFinalLevelAtomicMass(), kt->GetFinalLevelEnergy(), 0.1 ) );
+					(*kt)->SetPointerToFinalLevel( FindPointerToLevel( (*kt)->GetFinalLevelAtomicNumber(), (*kt)->GetFinalLevelAtomicMass(), (*kt)->GetFinalLevelEnergy(), 0.1 ) );
 			}
 		}
 	}
@@ -231,6 +314,40 @@ Level* LoadDecayData::FindPointerToLevel(int atomicNumber, int atomicMass, doubl
 	cout << atomicMass << " " << atomicNumber << " " << energy << endl;
 }
 
-
+void LoadDecayData::RecalculateIntensities( int atomicNumber, int atomicMass, double lvlEnergy,
+string transitionType, double transitionEnergy)
+{
+	 
+	for ( auto it = allNuclides_.begin(); it != allNuclides_.end(); ++it )
+	{
+		int atNumber = it->GetAtomicNumber();
+		int atMass = it->GetAtomicMass();
+		if(atomicNumber == atNumber && atomicMass == atMass)
+			for ( auto jt = it->GetNuclideLevels()->begin(); jt != it->GetNuclideLevels()->end(); ++jt )
+			{
+				double tempLvlE = jt->GetLevelEnergy();
+				if( ((tempLvlE - 1.) <= lvlEnergy) && ((tempLvlE + 1.) >= lvlEnergy) )
+				{
+					for ( auto kt = jt->GetTransitions()->begin(); kt != jt->GetTransitions()->end(); ++kt )
+					{
+						string tempType = (*kt)->GetParticleType();
+						double tempE = (*kt)->GetTransitionQValue();
+						
+						if(tempType != transitionType)
+							(*kt)->ChangeIntensity(0.);
+							
+						else if( !( ((tempE - 1.) <= transitionEnergy) && ((tempE + 1.) >= transitionEnergy) ) )
+							(*kt)->ChangeIntensity(0.);
+						else
+						{
+							(*kt)->ChangeIntensity(1.);
+							cout << "Changing intensity to 1." << endl;
+						}
+					}
+					jt->CalculateTotalProbability();
+				}
+			}
+	}
+}
 
 

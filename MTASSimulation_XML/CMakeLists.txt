@@ -19,12 +19,11 @@ configure_file ("${PROJECT_SOURCE_DIR}/MTASSimulationConfig.h.in"
 # You can set WITH_GEANT4_UIVIS to OFF via the command line or ccmake/cmake-gui
 # to build a batch mode only executable
 #
-SET (GEANT4_INSTALL_DATADIR /home/iuvenis/Geant4/geant4.10.04.p02-install/share/Geant4-10.4.2/geant4make )
 option(WITH_GEANT4_UIVIS "Build example with Geant4 UI and Vis drivers" ON)
 if(WITH_GEANT4_UIVIS)
-  find_package(Geant4 10.4.2 REQUIRED ui_all vis_all)
+  find_package(Geant4 10.3.1 REQUIRED ui_all vis_all)
 else()
-  find_package(Geant4 10.4.2  REQUIRED)
+  find_package(Geant4 10.3.1  REQUIRED)
 endif()
 
 

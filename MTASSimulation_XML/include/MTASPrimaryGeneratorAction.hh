@@ -2,7 +2,8 @@
 #ifndef MTASPrimaryGeneratorAction_h
 #define MTASPrimaryGeneratorAction_h 1
 
-#include "Decay.hh"
+#include "DeclareHeaders.hh"
+//#include "Transition.hh"
 #include "MTASDetectorConstruction.hh"
 
 #include "G4VUserPrimaryGeneratorAction.hh"
@@ -11,7 +12,6 @@
 #include <vector>
 
 static bool g_decaySimulationStatus(false);
-
 
 class MTASPrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {

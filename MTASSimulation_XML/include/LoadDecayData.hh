@@ -1,16 +1,15 @@
 
-
 #ifndef NEW_LDD_H
 #define	NEW_LDD_H
-#include "Nuclide.hh"
-#include "Decay.hh"
+
 #include <vector>
 #include <string>
-
-static std::string g_xmlInputFileName;
+#include <cmath>
 
 class Nuclide;
 class Level;
+class Transition;
+struct Event;
 
 class LoadDecayData
 {
@@ -26,14 +25,15 @@ public:
 
 private:
 	
-	//static const int numberOfShellIndexes_ = 4;
-	//void SetShellElectronConvCoef(std::string type, double value, double shellElectonConvCoeff_[]);
-	
 	Level* startLevel_;
 	Level* stopLevel_;
 	std::vector<Nuclide> allNuclides_;
+	
+	void SetPointersToTransitions();
 	void FindPointersToFinalLevels();
     Level* FindPointerToLevel(int atomicNumber, int atomicMass, double energy, double energyLvlUnc);
+    void RecalculateIntensities(int atomicNumber, int atomicMass, double lvlEnergy,
+	std::string transitionType, double transitionEnergy);
 
 };
 

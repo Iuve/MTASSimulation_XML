@@ -1,19 +1,14 @@
 
 #ifndef NEW_DECAY_H
 #define	NEW_DECAY_H
+
 #include "G4ParticleDefinition.hh"
-#include "LoadDecayData.hh"
-#include "Nuclide.hh"
-#include "Level.hh"
-#include "Transition.hh"
-#include "FermiDistribution.hh"
+
 #include <vector>
 #include <string>
 
-class Nuclide;
-class Level;
-class Transition;
-class LoadDecayData;
+extern double g_eventInSeconds;
+extern double g_cycleDurationInSeconds;
 
 struct Event
 {
@@ -30,16 +25,12 @@ public:
 	Decay(); // loading and preparing data
 	~Decay();
 	std::vector<Event> GenerateEventList();
-	void AddEvent(std::string, double, FermiDistribution*);
+	void AddEvent(Transition*);
 	
 	Level* FindTransition(Level*);
 	
-	//std::vector<Event> FindGammaEvents(Transition transition);
-	
 	
 private:	
-	
-	//bool IsGammaDecay(double electronConversionCoefficient);
 
 	Level* startLevel_;
 	Level* stopLevel_;

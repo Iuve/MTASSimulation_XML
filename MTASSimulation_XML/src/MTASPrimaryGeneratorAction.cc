@@ -42,7 +42,7 @@ void MTASPrimaryGeneratorAction::SetUp( void )
   G4int n_particle = 1;
   m_ParticleGun = new G4ParticleGun( n_particle );
 
-  G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+  //G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
   //G4ParticleDefinition* gammaPD = particleTable->FindParticle("gamma");
   //G4ParticleDefinition* neutronPD = particleTable->FindParticle("neutron");
   //G4ParticleDefinition* electronPD = particleTable->FindParticle("e-");
@@ -249,7 +249,7 @@ void MTASPrimaryGeneratorAction::GenerateSingleParticle( G4Event* anEvent )
 	G4ThreeVector direction( 1.0, 0.0, 0.0 );
 	GenerateIsotropicDirectionDistribution(&direction,0.0);
 	
-	G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+	//G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
 	//G4ParticleDefinition* electronPD = particleTable->FindParticle("e-");
 	//m_ParticleGun->SetParticleDefinition(electronPD);
 	//m_ParticleGun->SetParticleEnergy(500*keV);

@@ -1,112 +1,71 @@
 
-
 #ifndef NEW_TRANSITION_H
 #define	NEW_TRANSITION_H
-#include "Level.hh"
-#include "Decay.hh"
-#include "FermiDistribution.hh"
-#include "G4DataVector.hh"
-#include "G4AtomicTransitionManager.hh"
+
+#include "LoadDecayData.hh"
+
+#include "G4AtomicTransitionManager.hh" // It is needed but I have no idea why
+
 #include <string>
 #include <vector>
 
 
-class Level;
-struct Event;
 class Transition
 {
 public:
-	//static const int numberOfShellIndexes_ = 4;
-	//Transition(std::string type, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber);
-	Transition(std::string type, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber, 
-	FermiDistribution* betaEnergyDistribution, double electronConversionCoefficient = 0.);
-	Transition(std::string type, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber,
-	int atomicNumber, double electronConversionCoefficient = 0.);
+	Transition(std::string type, double transitionQValue, double intensity,
+	 double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber,
+	 double electronConversionCoefficient=0., int atomicNumber=0);
 	
 	~Transition();
 	
+	std::string GetParticleType(){return particleType_;}
+	double GetTransitionQValue(){return transitionQValue_;}
+	double GetIntensity(){return intensity_;}
 	double GetFinalLevelEnergy(){return finalLevelEnergy_;}
 	int GetFinalLevelAtomicMass(){return finalLevelAtomicMass_;}
 	int GetFinalLevelAtomicNumber(){return finalLevelAtomicNumber_;}
-	double GetTransitionQValue(){return transitionQValue_;}
-	std::string GetParticleType(){return particleType_;}
 	
-	double GetIntensity(){return intensity_;}
-	void SetRunningIntensity(double runningIntensity){runningIntensity_ = runningIntensity;} // intensities for calculations
+	void ChangeIntensity( double newIntensity) { intensity_ = newIntensity; }
+	
+	// intensities for calculations
+	void SetRunningIntensity(double runningIntensity){runningIntensity_ = runningIntensity;}
 	double GetRunningIntensity(){return runningIntensity_;}
 
 	void SetPointerToFinalLevel(Level* pointerToFinalLevel){pointerToFinalLevel_ = pointerToFinalLevel;}
 	Level* GetPointerToFinalLevel(){return pointerToFinalLevel_;}
-	// for beta purposes
-	FermiDistribution* GetBetaEnergyDistribution(){return betaEnergyDistribution_;}
-	std::vector<Event> FindBetaPlusEvents();
-	// for gamma purposes
-	double GetElectronConversionCoefficient(){return electronConversionCoefficient_;}
-	void FindICEvent(std::vector<Event> &decay);
-	void SetShellElectronConvCoef(std::string type, double value);
-	std::vector<Event> FindGammaEvents();
+	
+	// Virtual methods needed for B+, B- and G
+	virtual std::vector<Event> FindBetaEvent() {
+		std::cout << "I'm inside virtual FindBetaEvent, that should never happen! Something went wrong." <<std::endl;
+		std::vector<Event> temp;
+		return temp;
+		};
+	virtual std::vector<Event> FindGammaEvents() {
+		std::cout << "I'm inside virtual FindGammaEvents, that should never happen! Something went wrong." <<std::endl;
+		std::vector<Event> temp;
+		return temp;
+		};
+	virtual double GetElectronConversionCoefficient() {
+		std::cout << "I'm inside virtual GetElectronConversionCoefficient, that should never happen! Something went wrong." <<std::endl;
+		return 0;
+		};
 	
 
 private:
 	std::string particleType_;
 	double transitionQValue_;
-	Level* pointerToFinalLevel_;
+	double intensity_;
 	double finalLevelEnergy_;
 	int finalLevelAtomicMass_;
 	int finalLevelAtomicNumber_;
-	double intensity_;
+	
+	Level* pointerToFinalLevel_;
 	double runningIntensity_;
 	
-	//for beta purposes
-	FermiDistribution* betaEnergyDistribution_;
-	bool IsBetaPlusDecay();
-	
-	//for gamma purposes
-	static const int numberOfShellIndexes_ = 4;
-	void InitializeShellNumbers();
-	int FindPrimaryShellIndex();
-	bool IsRadiativeTransitionReachableShell(int shellIndex);
-	bool IsAugerReachableShell(int shellIndex);
-	void AddXRaysEvent(std::vector<Event> &decay, int primaryVacancies);
-	void AddAugerEvent(std::vector<Event> &decay, int primaryVacancies);
-	int FindRandomIndex( const G4DataVector transProb);
-	bool IsGammaDecay();
-	int atomicNumber_;
-	
-	
-	double shellElectonConvCoeff_[numberOfShellIndexes_];
 	double electronConversionCoefficient_;
-	int shellNumbers_[numberOfShellIndexes_]; 
-	G4AtomicTransitionManager* atomicTransitionManager_;
+	int atomicNumber_;
 
 };
-/*
-class Gamma: public Transition
-{
-public:
-	Gamma(std::string type, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber,
-	double electronConversionCoefficient = 0.);
-
-	Gamma(std::string type, double transitionQValue, double intensity, double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber,
-	double electronConversionCoefficient, double shellElectonConvCoeff[]);
-	
-	//double GetElectronConversionCoefficient(){return electronConversionCoefficient_;}
-	void FindICEvent(std::vector<Event> &decay);
-	
-private:
-	void InitializeShellNumbers();
-	int FindPrimaryShellIndex();
-	bool IsRadiativeTransitionReachableShell(int shellIndex);
-	bool IsAugerReachableShell(int shellIndex);
-	void AddXRaysEvent(std::vector<Event> &decay, int primaryVacancies);
-	void AddAugerEvent(std::vector<Event> &decay, int primaryVacancies);
-	int FindRandomIndex( const G4DataVector transProb);
-	
-	static const int numberOfShellIndexes_ = 4;
-	double shellElectonConvCoeff_[numberOfShellIndexes_];
-	double electronConversionCoefficient_;
-	int shellNumbers_[numberOfShellIndexes_]; 
-	G4AtomicTransitionManager* atomicTransitionManager_;
-}; */
 
 #endif	/* DECAY_H */

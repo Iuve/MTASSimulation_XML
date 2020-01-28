@@ -1,30 +1,29 @@
 
+#ifndef NEW_BETA_H
+#define	NEW_BETA_H
+
 #include "FermiDistribution.hh"
-#include "Decay.hh"
+
 #include <string>
 
 
-class Beta
+class Beta : public Transition
 {
 public:
-	Beta(double, int, FermiDistribution*);
+	Beta(std::string particleType, double transitionQValue, double intensity,
+	 double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber);
+	 
 	~Beta();
 	
-	double GetMaxBetaEnergy(){return maxBetaEnergy_;}
-	void FindBetaEvent();
-	std::vector<Event> GetBetaEvents(){return betaEvents_;}
+	std::vector<Event> FindBetaEvent();
 	
 	
 	
 private:
-	double maxBetaEnergy_;
-	int eCharge_;
-	std::vector<Event> betaEvents_;
-    
-	FermiDistribution* betaEnergyDistribution_;
 
-
-
-
-
+	//int eCharge_;
+	FermiDistribution betaEnergyDistribution_;
+	//std::string particleType_;
 };
+
+#endif

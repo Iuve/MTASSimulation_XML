@@ -28,7 +28,6 @@
 #include "G4UIterminal.hh"
 #include "G4VisManager.hh"
 
-
 #include "MTASDetectorConstruction.hh"
 #include "MTASPhysicsList.hh"
 #include "MTASPrimaryGeneratorAction.hh"

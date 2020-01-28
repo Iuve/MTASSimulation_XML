@@ -1,6 +1,5 @@
 
-
-#include "Nuclide.hh"
+#include "DeclareHeaders.hh"
 
 #include <vector>
 
