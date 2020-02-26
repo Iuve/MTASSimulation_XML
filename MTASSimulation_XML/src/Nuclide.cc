@@ -6,8 +6,8 @@
 
 
 
-Nuclide::Nuclide(int atomicNumber, int atomicMass, std::vector<Level> nuclideLevels):
-atomicNumber_(atomicNumber), atomicMass_(atomicMass), nuclideLevels_(nuclideLevels)
+Nuclide::Nuclide(int atomicNumber, int atomicMass, double qBeta, std::vector<Level> nuclideLevels):
+atomicNumber_(atomicNumber), atomicMass_(atomicMass), qBeta_(qBeta), nuclideLevels_(nuclideLevels)
 {
 	
 }
@@ -16,3 +16,139 @@ Nuclide::~Nuclide()
 {
 	
 }
+ /*
+void Nuclide::RemoveLevel(double levelEnergy)
+{
+    //int levelsSize = nuclideLevels_.size();
+    for( auto it = nuclideLevels_.begin(); it != nuclideLevels_.end(); ++it)
+    {
+        if(fabs(levelEnergy - it->GetLevelEnergy()) <= 1.)
+        {
+            //Level* pointerToRemovedLevel = &(*it);
+            //nuclideLevels_.erase(it);
+            levelsToDelete_.emplace_back( this, it->GetLevelEnergy() );
+            CheckTransitionsToLevel( &(*it) );
+            break;
+        }
+    }
+    DeleteLevels();
+    //int newLevelSize = nuclideLevels_.size();
+    //if(newLevelSize - 1 != levelsSize)
+    //    std::cout << "Warning: nuclideLevels_ size was not changed or changed incorrectly." << std::endl;
+}
+
+void Nuclide::CheckTransitionsToLevel(Level* level)
+{
+    DecayPath* decayPath = DecayPath::get();
+    std::vector<Nuclide>* nuclidesVector = decayPath->GetAllNuclides();
+
+    for ( auto it = nuclidesVector->begin(); it != nuclidesVector->end(); ++it )
+    {
+        for ( auto jt = it->GetNuclideLevels()->begin(); jt != it->GetNuclideLevels()->end(); ++jt )
+        {
+            for ( auto kt = jt->GetTransitions()->begin(); kt != jt->GetTransitions()->end(); ++kt )
+            {
+                if( (*kt)->GetPointerToFinalLevel() == level )
+                {
+                    //double transitionEnergy = (*kt)->GetTransitionQValue();
+                    //std::string transitionType = (*kt)->GetParticleType();
+                    //Level* initialLevel = (*kt)->GetPointerToInitialLevel();
+                    int nrOfTransitionsFromInitialLevel = (*jt).GetTransitions()->size();
+                    std::cout << "nrOfTransitionsFromInitialLevel: " << nrOfTransitionsFromInitialLevel  << std::endl;
+                    if(nrOfTransitionsFromInitialLevel <= 1)
+                    {
+                        levelsToDelete_.emplace_back( &(*it), jt->GetLevelEnergy() );
+                        CheckTransitionsToLevel(&(*jt));
+                    }
+                    else
+                    {
+                        jt->RemoveTransition( (*kt)->GetParticleType(), (*kt)->GetTransitionQValue() );
+                    }
+                    break;
+                }
+            }
+        }
+    }
+}
+
+void Nuclide::DeleteLevels()
+{
+    DecayPath* decayPath = DecayPath::get();
+    std::vector<Nuclide>* nuclidesVector = decayPath->GetAllNuclides();
+
+    placeToGo:
+    std::cout << "Inside placeToGo, levelsToDelete_.size(): " << levelsToDelete_.size() << std::endl;
+
+    if( levelsToDelete_.size() == 0)
+    {
+        decayPath->RecalculatePointers();
+        return;
+    }
+
+    for ( auto it = levelsToDelete_.begin(); it != levelsToDelete_.end(); ++it)
+    {
+        for ( auto jt = nuclidesVector->begin(); jt != nuclidesVector->end(); ++jt )
+        {
+            if( &(*jt) == (*it).first )
+            {
+                for ( auto kt = jt->GetNuclideLevels()->begin(); kt != jt->GetNuclideLevels()->end(); ++kt )
+                {
+                    if(fabs( (*it).second - kt->GetLevelEnergy() ) <= 1.)
+                    {
+
+                        std::cout << "Removing Level with energy: " << kt->GetLevelEnergy() << std::endl;
+                        std::cout << "Before lvl removal (*jt).nuclideLevels_.size(): " << (*jt).nuclideLevels_.size() << std::endl;
+                        (*jt).nuclideLevels_.erase(kt);
+                        std::cout << "After lvl removal (*jt).nuclideLevels_.size(): " << (*jt).nuclideLevels_.size() << std::endl;
+                        levelsToDelete_.erase(it);
+                        goto placeToGo;
+                    }
+                }
+            }
+        }
+    }
+
+    std::cout << "End of DeleteLevels function. levelsToDelete_ was not cleared, its size: " << levelsToDelete_.size() << std::endl;
+    levelsToDelete_.clear();
+    std::cout << "levelsToDelete_ is cleared now. Its size: " << levelsToDelete_.size() << std::endl;
+}
+
+void Nuclide::AddLevel(double energy, double spin, std::string parity, double T12)
+{
+    nuclideLevels_.push_back( Level(energy, spin, parity, T12) );
+    //add default gamma transition to ground state
+    nuclideLevels_.back().AddTransition("G", energy, 1.);
+    //add default beta minus transition to created level
+    DecayPath* decayPath = DecayPath::get();
+    std::vector<Nuclide>* nuclidesVector = decayPath->GetAllNuclides();
+    for ( auto jt = nuclidesVector->begin(); jt != nuclidesVector->end(); ++jt )
+    {
+        if( (atomicNumber_ + 1 == jt->GetAtomicNumber()) && (atomicMass_ == jt->GetAtomicMass()) )
+        {
+            for ( auto kt = jt->GetNuclideLevels()->begin(); kt != jt->GetNuclideLevels()->end(); ++kt )
+            {
+                if( fabs(kt->GetLevelEnergy()) <= 3. )
+                {
+                    kt->AddTransition("B-", jt->GetQBeta() - energy, 0.);
+                    //kt->NormalizeTransitionIntensities();
+                }
+            }
+        }
+    }
+}
+
+
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+

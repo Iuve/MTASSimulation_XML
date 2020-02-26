@@ -7,16 +7,20 @@
 #include <vector>
 #include <iostream>
 
+double g_eventInSeconds;
+void SetEventLength(double time) { g_eventInSeconds = time; }
 
 Decay::Decay()
 {
-
 	loadDecayData_ = new LoadDecayData();
 	allNuclides_ = loadDecayData_->GetAllNuclides();
 	startLevel_ = loadDecayData_->GetStartLevel();
 	stopLevel_ = loadDecayData_->GetStopLevel();
+	cycleDurationInSeconds_ = loadDecayData_->GetCycleDurationInSeconds();
+	eventDurationInSeconds_ = loadDecayData_->GetEventDurationInSeconds();
 	isomerLevel_ = 0L;
 	eventTimeInSeconds_ = 0.;
+	g_eventInSeconds = eventDurationInSeconds_;
 }
 
 
@@ -42,7 +46,7 @@ std::vector<Event> Decay::GenerateEventList()
 		currentLevel = isomerLevel_;
 		isomerLevel_ = 0L;
 		
-		if(!IfEmissionFromLevel(currentLevel, g_cycleDurationInSeconds - eventTimeInSeconds_))
+		if(!IfEmissionFromLevel(currentLevel, cycleDurationInSeconds_ - eventTimeInSeconds_))
 		{
 			eventTimeInSeconds_ = 0.; // end of event, no further transitions, zero time
 			//eventList_ is always empty at this moment so new decay can be started here
@@ -61,10 +65,10 @@ std::vector<Event> Decay::GenerateEventList()
 		nextLevel = FindTransition(currentLevel); // adding events to list in this line
 		currentLevel = nextLevel;
 		
-		if(!IfEmissionFromLevel(currentLevel, g_eventInSeconds))
+		if(!IfEmissionFromLevel(currentLevel, eventDurationInSeconds_))
 		{
 			isomerLevel_ = currentLevel;
-			eventTimeInSeconds_ += g_eventInSeconds;
+			eventTimeInSeconds_ += eventDurationInSeconds_;
 			
 			if (isomerLevel_ == stopLevel_)
 			{
@@ -90,7 +94,7 @@ void Decay::FindEventTime(Level* level)
 	else
 	{
 		double lambda = log(2.)/T12;
-		double emissionProbability = 1. - exp(-lambda * g_cycleDurationInSeconds);
+		double emissionProbability = 1. - exp(-lambda * cycleDurationInSeconds_);
 		double pseudoRandomProbability = G4UniformRand() * emissionProbability;
 		eventTimeInSeconds_ = -log(1. - pseudoRandomProbability) / lambda;
 	}
@@ -171,5 +175,3 @@ void Decay::AddEvent (Transition* drawnTransition)
 }
 
 
-
-Level* Decay::isomerLevel_ = 0L;

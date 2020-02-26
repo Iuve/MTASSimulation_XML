@@ -43,6 +43,7 @@
 
 extern void SetDecaySimulationStatus(bool);
 extern void SetXmlInputFileName(std::string);
+extern void SetEventLength(double);
 
 using namespace std;
 
@@ -95,6 +96,7 @@ int main(int argc,char** argv)
 
   if(argc==1) // Define (G)UI terminal for interactive mode  
   {
+	  SetEventLength(5e-7);
     G4UIsession * session = 0;
 		#ifdef G4UI_USE_TCSH
 			session = new G4UIterminal( new G4UItcsh );
@@ -109,6 +111,7 @@ int main(int argc,char** argv)
   else
   // Batch mode
   { 
+	SetEventLength(5e-7);
     G4String command = "/control/execute ";
     G4String fileName = argv[1];
     UI->ApplyCommand(command+fileName);

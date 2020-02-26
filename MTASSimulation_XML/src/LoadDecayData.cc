@@ -1,6 +1,5 @@
 
 #include "DeclareHeaders.hh"
-
 #include "pugixml.hh"
 
 #include <iostream>
@@ -8,12 +7,8 @@
 #include <vector>
 
 std::string g_xmlInputFileName;
-double g_eventInSeconds;
-double g_cycleDurationInSeconds;
 
 void SetXmlInputFileName(std::string xmlFileName) {g_xmlInputFileName = xmlFileName;}
-void SetEventLength(double time) { g_eventInSeconds = time; }
-void SetCycleLength(double time) { g_cycleDurationInSeconds = time; }
 
 const double energyLevelUncertanity(3.); // used in FindPointerToLevel
 
@@ -52,6 +47,12 @@ LoadDecayData::LoadDecayData()
 
 }
 
+LoadDecayData::LoadDecayData(string xmlFileName)
+{
+	g_xmlInputFileName = xmlFileName;
+	LoadDataFromXml();
+}
+
 LoadDecayData::~LoadDecayData()
 {
 
@@ -84,15 +85,15 @@ void LoadDecayData::LoadDataFromXml()
 	double tempTime = dir.child("EventLength").attribute("Value").as_double();
 	string tempTimeUnit = dir.child("EventLength").attribute("TimeUnit").value();
 	double tempTimeInSeconds = CalculateHalfLifeTimeInSeconds(tempTime, tempTimeUnit);
-	SetEventLength( tempTimeInSeconds );
+	eventDurationInSeconds_ = tempTimeInSeconds;
 	
 	tempTime = dir.child("CycleLength").attribute("Value").as_double();
 	tempTimeUnit = dir.child("CycleLength").attribute("TimeUnit").value();
 	tempTimeInSeconds = CalculateHalfLifeTimeInSeconds(tempTime, tempTimeUnit);
-	SetCycleLength( tempTimeInSeconds );
+	cycleDurationInSeconds_ = tempTimeInSeconds;
 	
-	cout << "Event length set to " << g_eventInSeconds << " seconds." << endl;
-	cout << "Cycle length set to " << g_cycleDurationInSeconds << " seconds." << endl;
+	cout << "Event length set to " << eventDurationInSeconds_ << " seconds." << endl;
+	cout << "Cycle length set to " << cycleDurationInSeconds_ << " seconds." << endl;
 	
 	if( !dir.child("SpecifyFirstTransition").empty() )
 	{
@@ -107,8 +108,19 @@ void LoadDecayData::LoadDataFromXml()
 		RecalculateIntensities(nuclideAtomicNumber, nuclideAtomicMass, initialLevelEnergy,
 		specifiedType, specifiedEnergy);
 		
-		
-		//if( !dir.child().empty)
+        if( !dir.child("SpecifySecondTransition").empty() )
+        {
+            nuclideAtomicNumber = dir.child("SpecifySecondTransition").attribute("NuclideAtomicNumber").as_int();
+            nuclideAtomicMass = dir.child("SpecifySecondTransition").attribute("NuclideAtomicMass").as_int();
+            initialLevel = dir.child("SpecifySecondTransition").child("InitialLevel");
+            initialLevelEnergy = initialLevel.attribute("Energy").as_double();
+            specifyTransition = dir.child("SpecifySecondTransition").child("SpecifyTransition");
+            specifiedType = specifyTransition.attribute("Type").value();
+            specifiedEnergy = specifyTransition.attribute("TransitionQValue").as_double();
+
+            RecalculateIntensities(nuclideAtomicNumber, nuclideAtomicMass, initialLevelEnergy,
+            specifiedType, specifiedEnergy);
+        }
 	}
 	
 }
@@ -123,7 +135,7 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
     pugi::xml_node nuclide = doc.child("Nuclide");
     int atNumber = nuclide.attribute("AtomicNumber").as_int();
 	int atMass = nuclide.attribute("AtomicMass").as_int();
-	//double QBeta = nuclide.attribute("QBeta").as_double(); // not used atm
+    double qBeta = nuclide.attribute("QBeta").as_double();
 	
     for (pugi::xml_node level = nuclide.first_child(); level; level = level.next_sibling())
     {       
@@ -136,11 +148,11 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 		{									
 			string type = transition.attribute("Type").value();
 			double transitionQval = transition.attribute("TransitionQValue").as_double();
-			double intensity = transition.attribute("Intensity").as_double();
+            double intensity = transition.attribute("Intensity").as_double();
 			double finalLvlEnergy = transition.child("TargetLevel").attribute("Energy").as_double();
 			int finalLvlAtMass = transition.child("TargetLevel").attribute("AtomicMass").as_int();
 			int finalLvlAtNumber = transition.child("TargetLevel").attribute("AtomicNumber").as_int();
-						
+
 			/*if(type == "B+")
 			{
 				FermiDistribution* fermiDist = new FermiDistribution(atNumber, transitionQval, 1);
@@ -169,8 +181,10 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 			}
 			else if(type == "G")
 			{
-				if( !transition.child("ElectronConversionCoefficient").empty() )
-				{
+				//additional check (if there is actual data, not only Total eCC, needed for example in 87Kr decay
+				if( !transition.child("ElectronConversionCoefficient").empty() && 
+				( (string)transition.child("ElectronConversionCoefficient").last_attribute().name() != "Total" ) )
+				{			
 					// eCC == ElectronConversionCoefficient
 					double eCC = transition.child("ElectronConversionCoefficient").attribute("Total").as_double(); 
 					Gamma gammaTransition(type, transitionQval, intensity, finalLvlEnergy, finalLvlAtMass, 
@@ -180,7 +194,7 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 					{
 						double value;
 						istringstream( attr.value() ) >> value;
-						cout << attr.name() << " " << value << endl;
+						//cout << attr.name() << " " << value << endl;
 						gammaTransition.SetShellElectronConvCoef(attr.name(), value);
 					}
 
@@ -213,11 +227,12 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 		
 		nuclideLevels.push_back(Level(lvlEnergy, lvlSpin, lvlParity, lvlHalfLifeTimeInSeconds,
 		 gammasFromLvL, betasFromLvL, neutronsFromLvL, alphasFromLvL));
+
     }
     
     cout << "Nuclide data uploaded successfully." << endl;
 	
-	return Nuclide(atNumber, atMass, nuclideLevels);
+    return Nuclide(atNumber, atMass, qBeta, nuclideLevels);
 }
 
 void LoadDecayData::SetPointersToTransitions()
@@ -262,11 +277,7 @@ void LoadDecayData::FindPointersToFinalLevels()
 		{
 			for ( auto kt = jt->GetTransitions()->begin(); kt != jt->GetTransitions()->end(); ++kt )
 			{
-				string type = (*kt)->GetParticleType();
-				if(type == "G") // have to improve it
-					(*kt)->SetPointerToFinalLevel( FindPointerToLevel( (*kt)->GetFinalLevelAtomicNumber(), (*kt)->GetFinalLevelAtomicMass(), (*kt)->GetFinalLevelEnergy(), energyLevelUncertanity ) );
-				else
-					(*kt)->SetPointerToFinalLevel( FindPointerToLevel( (*kt)->GetFinalLevelAtomicNumber(), (*kt)->GetFinalLevelAtomicMass(), (*kt)->GetFinalLevelEnergy(), 0.1 ) );
+                (*kt)->SetPointerToFinalLevel( FindPointerToLevel( (*kt)->GetFinalLevelAtomicNumber(), (*kt)->GetFinalLevelAtomicMass(), (*kt)->GetFinalLevelEnergy(), energyLevelUncertanity ) );
 			}
 		}
 	}
@@ -285,7 +296,7 @@ Level* LoadDecayData::FindPointerToLevel(int atomicNumber, int atomicMass, doubl
 				double temp = jt->GetLevelEnergy();
 				if( ((temp - energyLvlUnc) <= energy) && ((temp + energyLvlUnc) >= energy) )
 					return &(*jt);
-			} 
+            }
 	}
 	
 	// throw Exception
@@ -348,6 +359,11 @@ string transitionType, double transitionEnergy)
 				}
 			}
 	}
+}
+
+void LoadDecayData::RecalculatePointersToLevels()
+{
+    FindPointersToFinalLevels();
 }
 
 

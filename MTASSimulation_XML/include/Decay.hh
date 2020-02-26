@@ -7,9 +7,6 @@
 #include <vector>
 #include <string>
 
-extern double g_eventInSeconds;
-extern double g_cycleDurationInSeconds;
-
 struct Event
 {
 	double  energy;
@@ -37,11 +34,14 @@ private:
 	std::vector<Nuclide>* allNuclides_;
 	std::vector<Event> eventList_;
 	LoadDecayData* loadDecayData_;
-	static Level* isomerLevel_;
+	Level* isomerLevel_;
 	double eventTimeInSeconds_;
 	
 	void FindEventTime(Level*);
 	bool IfEmissionFromLevel(Level*, double);
+	
+	double cycleDurationInSeconds_;
+	double eventDurationInSeconds_;
 };
 
 #endif	/* DECAY_H */

@@ -13,6 +13,8 @@ public:
 	 std::vector<Gamma> gammasFromLvL, std::vector<Beta> betasFromLvL,
 	 std::vector<Neutron> neutronsFromLvL, std::vector<Alpha> alphasFromLvL); 
 	 
+    Level(double levelEnergy, double spin, std::string parity, double halfLifeTimeInSeconds);
+
 	~Level();
 	
 	double GetLevelEnergy(){return levelEnergy_;}
@@ -23,11 +25,19 @@ public:
 	std::vector<Neutron>* GetNeutronTransitions(){return &neutronsFromLvL_;}
 	std::vector<Alpha>* GetAlphaTransitions(){return &alphasFromLvL_;}
 	
+    void EditLevelEnergy(double energy) {levelEnergy_ = energy; }
 	void SetTransitions(std::vector<Transition*> transitions) { transitions_ = transitions; }
 	std::vector<Transition*>* GetTransitions(){return &transitions_;}
-	
+
+    void RemoveTransition(std::string type, double energy);
+    void UpdateTransitionVector();
+    void AddTransition(std::string type, double transitionQValue, double intensity);
+
+    void NormalizeTransitionIntensities();
 	void CalculateTotalProbability();
 	double GetTotalIntensity(){return totalIntensity_;}
+    double GetSpin(){return spin_; }
+    std::string GetParity(){return parity_; }
 
 private:
 	double levelEnergy_;
@@ -42,6 +52,7 @@ private:
 	
 	std::vector<Transition*> transitions_;
 	double totalIntensity_;
+    std::vector<Transition*> transitionsToDelete_;
 };
 
 #endif	/* DECAY_H */
