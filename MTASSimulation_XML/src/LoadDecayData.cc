@@ -10,7 +10,7 @@ std::string g_xmlInputFileName;
 
 void SetXmlInputFileName(std::string xmlFileName) {g_xmlInputFileName = xmlFileName;}
 
-const double energyLevelUncertanity(3.); // used in FindPointerToLevel
+const double energyLevelUncertainty(0.2); // used in FindPointerToLevel
 
 double CalculateHalfLifeTimeInSeconds(double time, std::string unit)
 {
@@ -75,12 +75,12 @@ void LoadDecayData::LoadDataFromXml()
 	int tempAtomicNumber = dir.child("StartLevel").attribute("AtomicNumber").as_int();
 	int tempAtomicMass = dir.child("StartLevel").attribute("AtomicMass").as_int();
 	double tempEnergy = dir.child("StartLevel").attribute("Energy").as_double();
-	startLevel_ = FindPointerToLevel(tempAtomicNumber, tempAtomicMass, tempEnergy, energyLevelUncertanity);
+	startLevel_ = FindPointerToLevel(tempAtomicNumber, tempAtomicMass, tempEnergy, energyLevelUncertainty);
 	
 	tempAtomicNumber = dir.child("StopLevel").attribute("AtomicNumber").as_int();
 	tempAtomicMass = dir.child("StopLevel").attribute("AtomicMass").as_int();
 	tempEnergy = dir.child("StopLevel").attribute("Energy").as_double();
-	stopLevel_ = FindPointerToLevel(tempAtomicNumber, tempAtomicMass, tempEnergy, energyLevelUncertanity);
+	stopLevel_ = FindPointerToLevel(tempAtomicNumber, tempAtomicMass, tempEnergy, energyLevelUncertainty);
 	
 	double tempTime = dir.child("EventLength").attribute("Value").as_double();
 	string tempTimeUnit = dir.child("EventLength").attribute("TimeUnit").value();
@@ -129,13 +129,21 @@ void LoadDecayData::LoadDataFromXml()
 Nuclide LoadDecayData::LoadNuclideData(const string filename)
 {	
 	std::vector<Level> nuclideLevels;
+	int atNumber;
+	int atMass;
+    double qBeta;
+	
 	pugi::xml_document doc;
-    if (!doc.load_file(filename.c_str())) cout << "Error connected to " << filename << " file." << endl; // Exception
+    if (!doc.load_file(filename.c_str()))
+    {
+		cout << "Error connected to " << filename << " file. Returning empty nuclide." << endl; // Exception
+		return Nuclide(atNumber, atMass, qBeta, nuclideLevels);
+	}
 
     pugi::xml_node nuclide = doc.child("Nuclide");
-    int atNumber = nuclide.attribute("AtomicNumber").as_int();
-	int atMass = nuclide.attribute("AtomicMass").as_int();
-    double qBeta = nuclide.attribute("QBeta").as_double();
+    atNumber = nuclide.attribute("AtomicNumber").as_int();
+	atMass = nuclide.attribute("AtomicMass").as_int();
+    qBeta = nuclide.attribute("QBeta").as_double();
 	
     for (pugi::xml_node level = nuclide.first_child(); level; level = level.next_sibling())
     {       
@@ -264,6 +272,7 @@ void LoadDecayData::SetPointersToTransitions()
 			}
 
 			jt->SetTransitions(pointersToTransitionsFromLvL);
+			jt->NormalizeTransitionIntensities();
 			jt->CalculateTotalProbability();
 		}
 	}
@@ -277,7 +286,7 @@ void LoadDecayData::FindPointersToFinalLevels()
 		{
 			for ( auto kt = jt->GetTransitions()->begin(); kt != jt->GetTransitions()->end(); ++kt )
 			{
-                (*kt)->SetPointerToFinalLevel( FindPointerToLevel( (*kt)->GetFinalLevelAtomicNumber(), (*kt)->GetFinalLevelAtomicMass(), (*kt)->GetFinalLevelEnergy(), energyLevelUncertanity ) );
+                (*kt)->SetPointerToFinalLevel( FindPointerToLevel( (*kt)->GetFinalLevelAtomicNumber(), (*kt)->GetFinalLevelAtomicMass(), (*kt)->GetFinalLevelEnergy(), energyLevelUncertainty ) );
 			}
 		}
 	}
@@ -300,8 +309,8 @@ Level* LoadDecayData::FindPointerToLevel(int atomicNumber, int atomicMass, doubl
 	}
 	
 	// throw Exception
-	cout << "Level not found!" << endl;
-	cout << atomicMass << " " << atomicNumber << " " << energy << endl;
+	cout << "Pointer to level " << energy << " in " << atomicMass << " " << atomicNumber <<
+	" not found with default accuracy of " << energyLevelUncertainty << "keV." << endl;
 	
 		// additional security
 	for ( auto it = allNuclides_.begin(); it != allNuclides_.end(); ++it )
@@ -309,20 +318,23 @@ Level* LoadDecayData::FindPointerToLevel(int atomicNumber, int atomicMass, doubl
 		int atNumber = it->GetAtomicNumber();
 		int atMass = it->GetAtomicMass();
 		if(atomicNumber == atNumber && atomicMass == atMass)								
-			for ( int i = 10; i < 51; i += 10)
+			for ( int i = 1; i < 51; i++)
 			{
 				for ( auto jt = it->GetNuclideLevels()->begin(); jt != it->GetNuclideLevels()->end(); ++jt )
 				{
 					double temp = jt->GetLevelEnergy();
 					if( ((temp - i) <= energy) && ((temp + i) >= energy) )
+					{
+                        cout << "Pointer to level " << energy << " found with accuracy of " << i << "keV." << endl;
 						return &(*jt);
+                    }
 				}
 			}
 	}
 	
 	// throw Exception
-	cout << "Level STILL not found!" << endl;
-	cout << atomicMass << " " << atomicNumber << " " << energy << endl;
+	cout << "Level " << energy << " STILL not found after 50keV threshold!" << endl;
+	//cout << atomicMass << " " << atomicNumber << " " << energy << endl;
 }
 
 void LoadDecayData::RecalculateIntensities( int atomicNumber, int atomicMass, double lvlEnergy,
@@ -337,7 +349,7 @@ string transitionType, double transitionEnergy)
 			for ( auto jt = it->GetNuclideLevels()->begin(); jt != it->GetNuclideLevels()->end(); ++jt )
 			{
 				double tempLvlE = jt->GetLevelEnergy();
-				if( ((tempLvlE - 1.) <= lvlEnergy) && ((tempLvlE + 1.) >= lvlEnergy) )
+				if( ((tempLvlE - 0.1) <= lvlEnergy) && ((tempLvlE + 0.1) >= lvlEnergy) )
 				{
 					for ( auto kt = jt->GetTransitions()->begin(); kt != jt->GetTransitions()->end(); ++kt )
 					{
@@ -347,7 +359,7 @@ string transitionType, double transitionEnergy)
 						if(tempType != transitionType)
 							(*kt)->ChangeIntensity(0.);
 							
-						else if( !( ((tempE - 1.) <= transitionEnergy) && ((tempE + 1.) >= transitionEnergy) ) )
+						else if( !( ((tempE - 0.1) <= transitionEnergy) && ((tempE + 0.1) >= transitionEnergy) ) )
 							(*kt)->ChangeIntensity(0.);
 						else
 						{

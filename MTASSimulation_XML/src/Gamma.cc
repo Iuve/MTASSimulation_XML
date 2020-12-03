@@ -16,6 +16,12 @@ int finalLevelAtomicNumber, double electronConversionCoefficient, int atomicNumb
 	atomicTransitionManager_ = G4AtomicTransitionManager::Instance();
 	atomicTransitionManager_->Initialise();
 	InitializeShellNumbers();
+	
+	if(atomicNumber != 0)
+	{
+		atomicNumber_ = atomicNumber;
+		electronConversionCoefficient_ = electronConversionCoefficient;
+	}
 }
 
 Gamma::~Gamma()
