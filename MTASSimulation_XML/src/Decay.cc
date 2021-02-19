@@ -139,16 +139,17 @@ void Decay::AddEvent (Transition* drawnTransition)
 	std::string particleType = drawnTransition->GetParticleType();
 	double energy = drawnTransition->GetTransitionQValue();
 	
-	if(particleType == "B-") 
+	if(particleType == "B-" || particleType == "B+" || particleType == "EC") 
 	{
 		std::vector<Event> betaEvents = drawnTransition->FindBetaEvent();
 		eventList_.insert(eventList_.end(), betaEvents.begin(), betaEvents.end()); 
 	}
-	if(particleType == "B+") 
+/*	if(particleType == "B+") 
 	{
 		std::vector<Event> betaEvents = drawnTransition->FindBetaEvent();
 		eventList_.insert(eventList_.end(), betaEvents.begin(), betaEvents.end()); 
 	}
+*/
 	if(particleType == "G") 
 	{
 		if ( drawnTransition->GetElectronConversionCoefficient() == 0L) //do sprawdzenia czy dziala!!
@@ -171,6 +172,11 @@ void Decay::AddEvent (Transition* drawnTransition)
 	{
 		G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
 		eventList_.push_back(Event(energy, particleTable->FindParticle("alpha")));
+	}
+	if(particleType == "P") 
+	{
+		G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
+		eventList_.push_back(Event(energy, particleTable->FindParticle("proton")));
 	}
 }
 

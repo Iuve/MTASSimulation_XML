@@ -52,12 +52,11 @@ void MTASSteppingAction::UserSteppingAction(const G4Step* theStep)
 	}
 	*/
 	
-	
 	if(globalTime / s > g_eventInSeconds)
 		{
 		track->SetTrackStatus(fStopAndKill);
 		} 
-		
+	
 		
 	 
 	if(materialName == "SodiumIodide")

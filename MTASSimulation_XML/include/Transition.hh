@@ -2,8 +2,6 @@
 #ifndef NEW_TRANSITION_H
 #define	NEW_TRANSITION_H
 
-#include "LoadDecayData.hh"
-
 #include "G4AtomicTransitionManager.hh" // It is needed but I have no idea why
 
 #include <string>

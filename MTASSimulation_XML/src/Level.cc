@@ -6,10 +6,11 @@
 
 Level::Level(double levelEnergy, double spin, std::string parity, double halfLifeTimeInSeconds,
  std::vector<Gamma> gammasFromLvL, std::vector<Beta> betasFromLvL,
- std::vector<Neutron> neutronsFromLvL, std::vector<Alpha> alphasFromLvL):
+ std::vector<Neutron> neutronsFromLvL, std::vector<Alpha> alphasFromLvL,
+ std::vector<Proton> protonsFromLvL):
 levelEnergy_(levelEnergy), spin_(spin), parity_(parity), halfLifeTimeInSeconds_(halfLifeTimeInSeconds),
  gammasFromLvL_(gammasFromLvL), betasFromLvL_(betasFromLvL), neutronsFromLvL_(neutronsFromLvL),
- alphasFromLvL_(alphasFromLvL)
+ alphasFromLvL_(alphasFromLvL), protonsFromLvL_(protonsFromLvL)
 {
 
 }

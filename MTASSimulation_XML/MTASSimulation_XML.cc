@@ -41,6 +41,10 @@
 #include <iostream>
 #include <fstream>
 
+
+#include "G4VisExecutive.hh"
+#include "G4UIExecutive.hh"
+
 extern void SetDecaySimulationStatus(bool);
 extern void SetXmlInputFileName(std::string);
 extern void SetEventLength(double);
@@ -67,12 +71,16 @@ int main(int argc,char** argv)
   
 // Visualization
 #ifdef G4VIS_USE
-  MTASVisualizationManager* visManager = new MTASVisualizationManager;
+ // MTASVisualizationManager* visManager = new MTASVisualizationManager;
+ // visManager->Initialize();
+ 
+  G4VisManager* visManager = new G4VisExecutive;
   visManager->Initialize();
-//  G4VisManager* visManager = new G4VisExecutive;
 #endif
 	
 // Global values definition
+  SetEventLength(5e-7);
+
 	if(argc == 3) 
 	{
 		SetDecaySimulationStatus(true);
@@ -92,29 +100,26 @@ int main(int argc,char** argv)
 
       
   //get the pointer to the User Interface manager 
-  G4UImanager * UI = G4UImanager::GetUIpointer();  
+  G4UImanager* UImanager = G4UImanager::GetUIpointer(); 
 
-  if(argc==1) // Define (G)UI terminal for interactive mode  
+  if(argc==1)
   {
-	  SetEventLength(5e-7);
-    G4UIsession * session = 0;
-		#ifdef G4UI_USE_TCSH
-			session = new G4UIterminal( new G4UItcsh );
-		#else
-			session = new G4UIterminal(); // G4UIterminal is a (dumb) terminal.
-		#endif
-
-    UI->ApplyCommand("/control/execute vis.mac");
-		session->SessionStart();
-    delete session;
+#ifdef G4UI_USE
+    G4UIExecutive* ui = new G4UIExecutive(argc, argv);
+#ifdef G4VIS_USE
+    UImanager->ApplyCommand("/control/execute vis.mac");
+#endif
+    //if (ui->IsGUI())
+    //   UImanager->ApplyCommand("/control/execute gui.mac");
+    ui->SessionStart();
+    delete ui;
+#endif
   }
-  else
-  // Batch mode
-  { 
-	SetEventLength(5e-7);
+  else{
     G4String command = "/control/execute ";
-    G4String fileName = argv[1];
-    UI->ApplyCommand(command+fileName);
+    G4String filename = argv[1];   
+      
+    UImanager->ApplyCommand(command+filename);
   }
   
 // Clean up

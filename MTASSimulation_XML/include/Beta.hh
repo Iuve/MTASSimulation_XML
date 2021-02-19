@@ -3,7 +3,8 @@
 #define	NEW_BETA_H
 
 #include "FermiDistribution.hh"
-
+#include "G4DataVector.hh"
+#include "G4AtomicTransitionManager.hh"
 #include <string>
 
 
@@ -15,15 +16,23 @@ public:
 	 
 	~Beta();
 	
+	void SetECCoef(std::string type, double value);
 	std::vector<Event> FindBetaEvent();
 	
 	
 	
 private:
 
-	//int eCharge_;
+	int FindPrimaryVacancies();
+	void AddXRaysEvent(std::vector<Event> &decay, int primaryVacancies);
+	void AddAugerEvent(std::vector<Event> &decay, int primaryVacancies);
+	int FindRandomIndex( const G4DataVector transProb);
+
+	int atomicNumber_;
 	FermiDistribution betaEnergyDistribution_;
-	//std::string particleType_;
+	double ECCoeff_[4];
+	
+	G4AtomicTransitionManager* atomicTransitionManager_;
 };
 
 #endif

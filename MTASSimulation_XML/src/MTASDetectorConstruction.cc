@@ -70,7 +70,7 @@ G4VPhysicalVolume* MTASDetectorConstruction::Construct()
 	m_HexagonModules = new MTASHexagonModules(m_logicWorld);
 	m_Ladder = new MTASLadder(m_logicWorld); //19.06.12 testy
 	m_SiliconDetectors = new MTASSiliconDetectors (m_logicWorld);
-	m_PhysicalSource = new MTASPhysicalSource(m_logicWorld);
+	//m_PhysicalSource = new MTASPhysicalSource(m_logicWorld);
 	m_Tape = new MTASTape(m_logicWorld);
 	m_Pulleys = new MTASPulleys(m_logicWorld);//19.06.12 testy
   m_logicWorld->SetVisAttributes(m_materialsAndColorsManager->GetWhite());

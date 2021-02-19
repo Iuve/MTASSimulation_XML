@@ -39,17 +39,18 @@ void Gamma::InitializeShellNumbers()
 
 void Gamma::SetShellElectronConvCoef(std::string type, double value)
 {
+	//std::cout << type << " " << value << std::endl;
 		if(type == "KC" || type == "KC+" )
-				for(int i=0; i<numberOfShellIndexes_; i++)
+			for(int i=0; i<numberOfShellIndexes_; i++)
 				shellElectonConvCoeff_[i] +=value;
 		else if (type == "LC" || type == "LC+" )
-				for(int i=1; i<numberOfShellIndexes_; i++)
+			for(int i=1; i<numberOfShellIndexes_; i++)
 				shellElectonConvCoeff_[i] +=value;
 		else if (type == "MC" || type == "MC+" )
-				for(int i=2; i<numberOfShellIndexes_; i++)
+			for(int i=2; i<numberOfShellIndexes_; i++)
 				shellElectonConvCoeff_[i] +=value;
 		else
-				shellElectonConvCoeff_[3] +=value;
+			shellElectonConvCoeff_[3] +=value;
 }
 
 std::vector<Event> Gamma::FindGammaEvents()

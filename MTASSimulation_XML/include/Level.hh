@@ -11,7 +11,8 @@ class Level
 public:
 	Level(double levelEnergy, double spin, std::string parity, double halfLifeTimeInSeconds,
 	 std::vector<Gamma> gammasFromLvL, std::vector<Beta> betasFromLvL,
-	 std::vector<Neutron> neutronsFromLvL, std::vector<Alpha> alphasFromLvL); 
+	 std::vector<Neutron> neutronsFromLvL, std::vector<Alpha> alphasFromLvL,
+	 std::vector<Proton> protonsFromLvL); 
 	 
     Level(double levelEnergy, double spin, std::string parity, double halfLifeTimeInSeconds);
 
@@ -24,6 +25,7 @@ public:
 	std::vector<Gamma>* GetGammaTransitions(){return &gammasFromLvL_;}
 	std::vector<Neutron>* GetNeutronTransitions(){return &neutronsFromLvL_;}
 	std::vector<Alpha>* GetAlphaTransitions(){return &alphasFromLvL_;}
+	std::vector<Proton>* GetProtonTransitions(){return &protonsFromLvL_;}
 	
     void EditLevelEnergy(double energy) {levelEnergy_ = energy; }
 	void SetTransitions(std::vector<Transition*> transitions) { transitions_ = transitions; }
@@ -49,6 +51,7 @@ private:
     std::vector<Beta> betasFromLvL_;
     std::vector<Neutron> neutronsFromLvL_;
     std::vector<Alpha> alphasFromLvL_;
+    std::vector<Proton> protonsFromLvL_;
 	
 	std::vector<Transition*> transitions_;
 	double totalIntensity_;
