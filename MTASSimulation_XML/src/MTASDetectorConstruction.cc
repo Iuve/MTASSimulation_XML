@@ -39,8 +39,8 @@ MTASDetectorConstruction::~MTASDetectorConstruction()
 	if(m_HexagonModules != 0)
 		delete m_HexagonModules;
 		
-	if(m_PhysicalSource != 0)
-		delete m_PhysicalSource;
+//	if(m_PhysicalSource != 0)
+//		delete m_PhysicalSource;
 		
 	if(m_SiliconDetectors != 0)
 		delete m_SiliconDetectors;

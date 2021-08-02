@@ -20,7 +20,7 @@ Decay::Decay()
 	eventDurationInSeconds_ = loadDecayData_->GetEventDurationInSeconds();
 	isomerLevel_ = 0L;
 	eventTimeInSeconds_ = 0.;
-	g_eventInSeconds = eventDurationInSeconds_;
+	SetEventLength(eventDurationInSeconds_);
 }
 
 
