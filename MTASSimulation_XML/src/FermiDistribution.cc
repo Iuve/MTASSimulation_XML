@@ -19,12 +19,13 @@
 //#include <cstdlib>
 //#include <ctime>
 
-FermiDistribution::FermiDistribution(int atomicNumber, double qVal, int eCharge):
-atomicNumber_(atomicNumber), qVal_(qVal), eCharge_(eCharge) 
+FermiDistribution::FermiDistribution(int atomicNumber, double qVal, int eCharge, int betaTransitionType):
+atomicNumber_(atomicNumber), qVal_(qVal), eCharge_(eCharge), betaTransitionType_(betaTransitionType)
 {
 	if((eCharge_ -1) > 1e-6 && (eCharge_ +1) > 1e-6)
 		throw Exception ("FermiDistribution::FermiDistribution wrong eCharge argument");
 	CalculateBetaEnergyDistribution();
+	std::cout << "betaTransitionType_ = " << betaTransitionType_ << std::endl;
 }
 
 FermiDistribution::~FermiDistribution()
@@ -41,7 +42,7 @@ void FermiDistribution::CalculateBetaEnergyDistribution()
    electronMass_ = 511;
 	
 	
-	std::cout<<"calculate beta energy distribution for E = "<<qVal_;
+	//std::cout<<"calculate beta energy distribution for E = "<<qVal_;
 	nrOfSteps_ = static_cast<int> (qVal_) / nrOfkeVperChan_;
 	v0_ = 1.13 * pow(alpha_, 2) * pow((atomicNumber_ - eCharge_), 4. / 3.); 
 	S_ = pow((1 - alpha_ * alpha_ * atomicNumber_ * atomicNumber_), 0.5) - 1.;
@@ -92,7 +93,9 @@ double FermiDistribution::FindProbabilityDensityValue(double x)
 	delta0_ = alpha_ * atomicNumber_ * gamma0 / ni0;
 	double gammaValue = EulerGammaFunction(gammaFinal_);
 	probabilityDensityValue = gamma0 * ni0 * pow((1. - x), 2) * pow(ni0, 2. * S_) * exp(-1. * eCharge_ * pi_ * delta0_) * gammaValue;
-	return probabilityDensityValue;
+	double betaEn = qVal_ * x;
+	double shapeFact = GetShapeCorrectionFactor(betaEn);
+	return probabilityDensityValue*shapeFact;
 }
 
 double FermiDistribution::EulerGammaFunction(double finalValue)
@@ -108,6 +111,50 @@ double FermiDistribution::EulerGammaFunction(double finalValue)
 	}
 	gammaValue *= stepValue;
 	return gammaValue;
+}
+
+double FermiDistribution::GetShapeCorrectionFactor(double betaEn)
+{
+/*
+  F : Fermi Decay
+  1-: pe^2  + Eν^2 + 2/3 β^2 * Eν * Ee
+  GT : Gamow-Teller Decay
+  0-: pe^2  + Eν^2 + 2β^2 * Eν * Ee
+  1-: pe^2  + Eν^2 - 4/3 * β^2 * Eν * Ee
+  2-: pe^2  + Eν^2 
+  β = pe/Ee    
+
+*/  
+    double Ee = betaEn; 
+    double Etote = Ee+511; 
+    double Ev = qVal_ - Ee;
+    double pe = pow( Etote * Etote - 511*511, 0.5 );
+    double beta = pe/Ee;
+    double s;
+    
+    switch( betaTransitionType_ )
+    {
+	case 0:
+		s = 1;
+		break;
+	case 1:
+		s = pe * pe + Ev*Ev + 2.0 *  beta * beta * Ev*Ee; // 0- GT
+		break;
+	case 2:
+		s = pe * pe + Ev*Ev - 4.0 / 3.0 *  beta * beta * Ev*Ee; // 1- GT
+		break;
+	case 3:
+		s = pe * pe + Ev*Ev; // 2- GT
+		break;
+	case 4:
+		s = pe * pe + Ev*Ev + 2.0/3.0 * beta * beta * Ev*Ee; //1- FF
+		break;
+	default:
+		s = 1;
+		break;
+	}
+    //std::cout << betaEn << " " << s << std::endl;
+    return s;
 }
 
 double FermiDistribution::GetRandomBetaEnergy()

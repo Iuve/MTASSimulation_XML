@@ -71,6 +71,7 @@ void LoadDecayData::LoadDataFromXml()
 	SetPointersToTransitions();
 	
 	FindPointersToFinalLevels();
+	FindPointersToInitialLevels();
 	
 	int tempAtomicNumber = dir.child("StartLevel").attribute("AtomicNumber").as_int();
 	int tempAtomicMass = dir.child("StartLevel").attribute("AtomicMass").as_int();
@@ -233,7 +234,8 @@ Nuclide LoadDecayData::LoadNuclideData(const string filename)
 				cout << "Unknown particle type: " << type << "! Data not registered." << endl;
 			}		
 		}
-		double lvlEnergy = level.attribute("Energy").as_double();
+		
+        double lvlEnergy = level.attribute("Energy").as_double();
 		double lvlSpin = level.attribute("Spin").as_double();
 		string lvlParity = level.attribute("Parity").value();
 		double lvlHalfLifeTime = level.attribute("HalfLifeTime").as_double();
@@ -299,6 +301,20 @@ void LoadDecayData::FindPointersToFinalLevels()
 			for ( auto kt = jt->GetTransitions()->begin(); kt != jt->GetTransitions()->end(); ++kt )
 			{
                 (*kt)->SetPointerToFinalLevel( FindPointerToLevel( (*kt)->GetFinalLevelAtomicNumber(), (*kt)->GetFinalLevelAtomicMass(), (*kt)->GetFinalLevelEnergy(), energyLevelUncertainty ) );
+			}
+		}
+	}
+}
+
+void LoadDecayData::FindPointersToInitialLevels()
+{
+	for ( auto it = allNuclides_.begin(); it != allNuclides_.end(); ++it )
+	{
+		for ( auto jt = it->GetNuclideLevels()->begin(); jt != it->GetNuclideLevels()->end(); ++jt )
+		{
+			for ( auto kt = jt->GetTransitions()->begin(); kt != jt->GetTransitions()->end(); ++kt )
+			{
+                (*kt)->SetPointerToInitialLevel( &(*jt) );
 			}
 		}
 	}

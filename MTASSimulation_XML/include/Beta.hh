@@ -27,10 +27,22 @@ private:
 	void AddXRaysEvent(std::vector<Event> &decay, int primaryVacancies);
 	void AddAugerEvent(std::vector<Event> &decay, int primaryVacancies);
 	int FindRandomIndex( const G4DataVector transProb);
+	void CalculateBetaStuff();
+	void CheckBetaTransitionType();
 
 	int atomicNumber_;
 	FermiDistribution betaEnergyDistribution_;
 	double ECCoeff_[4];
+	
+//	betaTransitionType = 0: allowed Fermi and GT
+//  GT : Gamow-Teller Decay
+//  betaTransitionType = 1: 0-: pe^2  + Eν^2 + 2β^2 * Eν * Ee
+//  betaTransitionType = 2: 1-: pe^2  + Eν^2 - 4/3 * β^2 * Eν * Ee
+//  betaTransitionType = 3: 2-: pe^2  + Eν^2 
+//	F : Fermi Decay
+//  betaTransitionType = 4: 1-: pe^2  + Eν^2 + 2/3 β^2 * Eν * Ee
+	int betaTransitionType_;
+	bool calculationsDone_;
 	
 	G4AtomicTransitionManager* atomicTransitionManager_;
 };

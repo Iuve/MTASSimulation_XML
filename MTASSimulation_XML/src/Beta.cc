@@ -8,22 +8,36 @@
 
 #include <vector>
 #include <iostream>
+#include <string>
 
 
 Beta::Beta(std::string particleType, double transitionQValue, double intensity,
  double finalLevelEnergy, int finalLevelAtomicMass, int finalLevelAtomicNumber):
 Transition(particleType, transitionQValue, intensity, finalLevelEnergy,
  finalLevelAtomicMass, finalLevelAtomicNumber)
+{	
+	calculationsDone_ = false;
+		
+}
+
+Beta::~Beta()
 {
+
+}
+
+void Beta::CalculateBetaStuff()
+{
+	CheckBetaTransitionType();
+	
 	if(GetParticleType() == "B-")
 	{
 		//beta minus
-		betaEnergyDistribution_ = FermiDistribution(GetFinalLevelAtomicNumber() - 1, GetTransitionQValue(), -1);
+		betaEnergyDistribution_ = FermiDistribution(GetFinalLevelAtomicNumber() - 1, GetTransitionQValue(), -1, betaTransitionType_);
 	}
 	else if(GetParticleType() == "B+")
 	{
 		//beta plus
-		betaEnergyDistribution_ = FermiDistribution(GetFinalLevelAtomicNumber() + 1, GetTransitionQValue(), +1);
+		betaEnergyDistribution_ = FermiDistribution(GetFinalLevelAtomicNumber() + 1, GetTransitionQValue(), +1, betaTransitionType_);
 		//std::cout << "Beta+ created" << std::endl;
 	}
 	else if(GetParticleType() == "EC")
@@ -33,12 +47,53 @@ Transition(particleType, transitionQValue, intensity, finalLevelEnergy,
 	}
 	else
 		std::cout << "Wrong particle type in Beta class." << std::endl; 
-		
+	
+	calculationsDone_ = true;
 }
 
-Beta::~Beta()
+void Beta::CheckBetaTransitionType()
 {
+	//std::cout << "CheckBetaTransitionType() poczatek" << std::endl;
 
+	double initialLevelSpin = this->GetPointerToInitialLevel()->GetSpin();
+	double finalLevelSpin = this->GetPointerToFinalLevel()->GetSpin();
+	std::string initialLevelParity = this->GetPointerToInitialLevel()->GetParity();
+	std::string finalLevelParity = this->GetPointerToFinalLevel()->GetParity();
+	
+//	betaTransitionType = 0: allowed Fermi and GT
+//  GT : Gamow-Teller Decay
+//  betaTransitionType = 1: 0-: pe^2  + Eν^2 + 2β^2 * Eν * Ee
+//  betaTransitionType = 2: 1-: pe^2  + Eν^2 - 4/3 * β^2 * Eν * Ee
+//  betaTransitionType = 3: 2-: pe^2  + Eν^2 
+//	F : Fermi Decay
+//  betaTransitionType = 4: 1-: pe^2  + Eν^2 + 2/3 β^2 * Eν * Ee
+
+	//std::cout << "initialLevelParity = " << initialLevelParity << std::endl;
+	//std::cout << "finalLevelParity = " << finalLevelParity << std::endl;
+	
+	if( !(((initialLevelParity == "+") || (initialLevelParity == "-")) && 
+	((finalLevelParity == "+") || (finalLevelParity == "-"))) )
+	{
+		//std::cout << "no correct parity" << std::endl;
+		betaTransitionType_ = 0;
+		return;
+	}
+
+	if(finalLevelParity == initialLevelParity)
+		betaTransitionType_ = 0;
+	else
+	{
+		double spinDifference = abs(initialLevelSpin - finalLevelSpin);
+		//std::cout << "spinDifference = " << spinDifference << std::endl;
+		if( (spinDifference >= -0.01) && (spinDifference <= 0.01) )
+			betaTransitionType_ = 1;
+		else if( (spinDifference >= 0.99) && (spinDifference <= 1.01) )
+			betaTransitionType_ = 2;
+		else if( (spinDifference >= 1.99) && (spinDifference <= 2.01) )
+			betaTransitionType_ = 3;
+		else
+			betaTransitionType_ = 0;
+	}
 }
 
 void Beta::SetECCoef(std::string type, double value)
@@ -59,6 +114,9 @@ void Beta::SetECCoef(std::string type, double value)
 
 std::vector<Event> Beta::FindBetaEvent()
 {
+	if( !calculationsDone_ )
+		CalculateBetaStuff();
+	
 	std::vector<Event> betaEvents;
 	G4ParticleTable* particleTable = G4ParticleTable::GetParticleTable();
 
@@ -83,8 +141,9 @@ std::vector<Event> Beta::FindBetaEvent()
 		atomicNumber_ = GetFinalLevelAtomicNumber() + 1;
 		int primaryVacancies = FindPrimaryVacancies();
 		//Auger or X-rays
+		//std::cout << "atomicNumber_ = " << atomicNumber_ << ", primaryVacancies = " << primaryVacancies << std::endl;
 		double totalRadTransitProb = atomicTransitionManager_->
-		TotalRadiativeTransitionProbability(atomicNumber_, primaryVacancies);
+		TotalRadiativeTransitionProbability(atomicNumber_ - 1, primaryVacancies);
 
 		//x rays
 		if(G4UniformRand() < totalRadTransitProb)	
@@ -95,7 +154,7 @@ std::vector<Event> Beta::FindBetaEvent()
 		//non rad - Auger
 		else
 		{
-			AddXRaysEvent(betaEvents, primaryVacancies);
+			AddAugerEvent(betaEvents, primaryVacancies);
 			//std::cout << "Auger" << std::endl;	
 		}
 	}
@@ -109,6 +168,10 @@ int Beta::FindPrimaryVacancies()
 {
 	const unsigned int nrOfShells = atomicTransitionManager_-> NumberOfShells(atomicNumber_);
 	double randomNumber = G4UniformRand()*ECCoeff_[3];
+	std::cout << "randomNumber = " << randomNumber << std::endl;
+	for(int i = 0; i < 4; i++)
+		std::cout << "ECCoeff_[i] = " << ECCoeff_[i] << std::endl;
+	
 	if(randomNumber<=ECCoeff_[0])//K - shell nr = 0
 		return 0;
 		

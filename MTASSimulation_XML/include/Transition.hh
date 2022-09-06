@@ -33,6 +33,8 @@ public:
 
     void SetPointerToFinalLevel(Level* pointerToFinalLevel){pointerToFinalLevel_ = pointerToFinalLevel;}
     Level* GetPointerToFinalLevel(){return pointerToFinalLevel_;}
+    void SetPointerToInitialLevel(Level* pointerToInitialLevel){pointerToInitialLevel_ = pointerToInitialLevel;}
+    Level* GetPointerToInitialLevel(){return pointerToInitialLevel_;}
 	
 	// Virtual methods needed for B+, B- and G
 	virtual std::vector<Event> FindBetaEvent() {
@@ -59,6 +61,7 @@ private:
 	int finalLevelAtomicNumber_;
 	
     Level* pointerToFinalLevel_;
+    Level* pointerToInitialLevel_;
 	double runningIntensity_;
 	
 	double electronConversionCoefficient_;
