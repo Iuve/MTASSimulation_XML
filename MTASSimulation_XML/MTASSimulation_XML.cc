@@ -37,6 +37,8 @@
 #include "MTASAnalysisManager.hh" 
 #include "G4ios.hh"
 
+// #include "QBBC.hh"
+
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -59,6 +61,9 @@ int main(int argc,char** argv)
 	runManager->SetVerboseLevel(2);
 // UserInitialization classes (mandatory)
   MTASPhysicsList* physicsList = new MTASPhysicsList;
+//     G4VModularPhysicsList* physicsList = new QBBC;
+//  physicsList->SetVerboseLevel(2);
+
   runManager->SetUserInitialization( physicsList );
   
   MTASDetectorConstruction* detector = new MTASDetectorConstruction;

@@ -60,6 +60,8 @@ void Beta::CheckBetaTransitionType()
 	std::string initialLevelParity = this->GetPointerToInitialLevel()->GetParity();
 	std::string finalLevelParity = this->GetPointerToFinalLevel()->GetParity();
 	
+// Transition corrections from: A.C. Hayes et al., PRL 112, 202501 (2014)	
+	
 //	betaTransitionType = 0: allowed Fermi and GT
 //  GT : Gamow-Teller Decay
 //  betaTransitionType = 1: 0-: pe^2  + Eν^2 + 2β^2 * Eν * Ee

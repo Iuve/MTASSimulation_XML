@@ -361,7 +361,8 @@ Level* LoadDecayData::FindPointerToLevel(int atomicNumber, int atomicMass, doubl
 	}
 	
 	// throw Exception
-	cout << "Level " << energy << " STILL not found after 50keV threshold!" << endl;
+	cout << "Level " << energy << " STILL not found after 50keV threshold! Returning nullptr." << endl;
+	return nullptr;
 	//cout << atomicMass << " " << atomicNumber << " " << energy << endl;
 }
 

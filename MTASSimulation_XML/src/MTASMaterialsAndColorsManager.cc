@@ -170,6 +170,14 @@ MTASMaterialsAndColorsManager::MTASMaterialsAndColorsManager()
 	
 	m_Silver = new G4Material("Silver", density = 10.49 *g/cm3, numberElements = 1);
 	m_Silver->AddElement(Ag, 1);
+	
+	//Test cable (MS October 2022)
+	m_CableTest = new G4Material("CableTest", density = 3.00 *g/cm3, numberElements = 2);
+	m_CableTest->AddMaterial(m_Polyethylene, 50*perCent);
+	m_CableTest->AddMaterial(m_Copper, 50*perCent);
+	
+	m_LowDensityAluminium = new G4Material( "LowDensityAluminium", density= 0.95*g/cm3, numberElements=1 );
+	m_LowDensityAluminium->AddElement( Al, 1 );
 			
 	m_Green= new G4VisAttributes(G4Colour(0.0,1.0,0.0));  //Green color for NaI volumes
 	m_Green->SetVisibility(true);

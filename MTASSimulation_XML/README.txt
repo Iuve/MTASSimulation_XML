@@ -1,3 +1,8 @@
+# Installation:
+# You may need to modify CMakeLists.txt (add below lines)
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
+
 How to run MTASSimulation_XML with different number of input files:
 
 1) No input file (e.g. in Linux terminal "$ ./MTASSimulation_XML") - default macro file 'vis.mac' will be exectuted. 'vis.mac' contains visualization options.

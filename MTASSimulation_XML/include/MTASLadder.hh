@@ -23,6 +23,8 @@ private:
 	//G4LogicalVolume* backboneLogVol2;
 	//G4LogicalVolume* backboneLogVol3;
 	G4LogicalVolume* pipeLogVol;
+	G4LogicalVolume* cableLogVol; //MS October 2022
+        G4LogicalVolume* squareCableLogVol;
 	
 	MTASMaterialsAndColorsManager* m_materialsAndColorsManager;
 	

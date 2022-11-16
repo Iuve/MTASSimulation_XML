@@ -45,6 +45,9 @@ private:
 	G4Material* m_Copper;
 	G4Material* m_IronOxide;
 	G4Material* m_Silver;
+	//Test cable (MS October 2022)
+	G4Material* m_CableTest;
+	G4Material* m_LowDensityAluminium;
 		
 	G4VisAttributes* m_Green;
 	G4VisAttributes* m_Grey;
@@ -84,6 +87,9 @@ public:
 	G4Material* GetCopper() {return m_Copper;}
 	G4Material* GetIronOxide() {return m_IronOxide;}
 	G4Material* GetSilver() {return m_Silver;}
+	//Test cable (MS October 2022)
+	G4Material* GetCableTest() {return m_CableTest;}
+	G4Material* GetLowDensityAluminium() {return m_LowDensityAluminium;}
 	    
 	G4VisAttributes* GetGreen() { return m_Green;}
 	G4VisAttributes* GetGrey() { return m_Grey;}

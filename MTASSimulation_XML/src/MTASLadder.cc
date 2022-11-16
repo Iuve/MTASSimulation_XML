@@ -7,6 +7,8 @@
 #include "G4Box.hh"
 #include "G4Tubs.hh"
 #include "G4Trap.hh"
+#include "G4Trd.hh"
+#include "G4Torus.hh"
 #include "G4SubtractionSolid.hh"
 #include "G4UnionSolid.hh"
 #include "G4LogicalVolume.hh"
@@ -117,6 +119,103 @@ void MTASLadder::Construct()
 	G4RotationMatrix* zRot = new G4RotationMatrix; 
 	zRot->rotateZ(pi*rad); //no rotation
 	new G4PVPlacement( zRot, position, backboneLogVol, "backbonePhysical", m_logicWorld, 0, 1 );
+	
+	
+	//Test cables (MS October 2022)
+	G4Material* cableMaterial= m_materialsAndColorsManager->GetCableTest();
+	G4Tubs *cableSolid = new G4Tubs("cableSolid", 0.*cm,0.5*cm, pipeLength/2., 0., 360.);
+	cableLogVol = new G4LogicalVolume(cableSolid,cableMaterial,"cableLogVol");
+	position = G4ThreeVector(ladderXPosition+A+C/2. - 0.75*cm, -1.0*cm, -length/2. + notchZPosition);
+	//new G4PVPlacement( 0, position, cableLogVol, "cablePhysical", m_logicWorld, 0, 0 );
+	
+	position = G4ThreeVector(-ladderXPosition-A-C/2. + 0.75*cm, -1.0*cm, -length/2. + notchZPosition);
+	//new G4PVPlacement( 0, position, cableLogVol, "cablePhysical", m_logicWorld, 0, 0 );
+	/*
+        G4Box *squareCableSolid = new G4Box("squareCableSolid", 2.0*cm, 1.0*mm, 2.5*cm);
+        squareCableLogVol = new G4LogicalVolume(squareCableSolid,cableMaterial,"squareCableLogVol");
+        position = G4ThreeVector(0., 5.0*mm, 0.);
+        G4RotationMatrix*	rotationMatrixArray = new G4RotationMatrix();
+        rotationMatrixArray->rotateY(CLHEP::pi*rad);
+        new G4PVPlacement( rotationMatrixArray, position, squareCableLogVol, "squareCablePhysical", m_logicWorld, 0, 0 );
+    */
+    
+    //Aluminium blob/vacuum from Charlie, November 2022
+    
+// Top trapazoid, or G4Trd() if you will. Unrotated coordiantes are here. will rotate by 90 degrees around Y axis.
+        const G4double wireOffsetY = 9.0 * mm;
+        const G4double dx0_1 = 38.6 * mm;
+        const G4double dx0_2 = 10.0 * mm;
+        const G4double dy0_1 = 1.0 * mm;
+        const G4double dy0_2 = 10.0 * mm;
+        const G4double z0 = 22.0 * mm;
+    // Cut tub to connect cylinder and flat part
+        const G4double rMin = 0.0*mm;
+        const G4double rMax = 0.4 * 10.0 * mm;
+        const G4double halfz1 = 0.5 * 4.0 * mm;
+        const G4double Rtorus = 15.0 * mm;
+        const G4double zHalfLength = 50.0 * mm;
+//        const G4ThreeVector normTop(-0.707,0.0,-0.707);
+//        const G4ThreeVector normBot(0.0,0.0,1.0);
+        const G4ThreeVector deltaw_0_1(0.0,-0.4*mm,0.5*z0+halfz1 - 1.8 * mm);
+        const G4double  startPhi = 0.0 * degree;
+		const G4double  deltaPhi = 360.0 * degree;
+		
+		G4Material* wire_Shield_Material= m_materialsAndColorsManager->GetLowDensityAluminium();
+
+        G4Trd* wire0_solid = new G4Trd( "wire_0" , 0.5*dx0_1, 0.5*dx0_2, 0.5*dy0_1, 0.5*dy0_2, 0.5*z0 );
+//        G4CutTubs* wire1_solid = new G4CutTubs( "wire_1" , rMin, rMax, halfz1, startPhi, deltaPhi, normTop, normBot );
+        G4Tubs* wire1_solid = new G4Tubs( "wire_1" , rMin, rMax, halfz1, startPhi, deltaPhi );
+
+        G4RotationMatrix* rot_w01 = new G4RotationMatrix();//(matrixColumn1, matrixColumn2, matrixColumn3);
+        rot_w01->rotateX( -15.0 * degree );
+        //m_Rotations.push_back(rot_w01);
+
+//        G4UnionSolid* ladderUnion1_solid = new G4UnionSolid ("ladderUnion1_solid", laddreInAir1_Solid, ladderFlat1_Solid, rotY0, deltaPos);
+
+        G4UnionSolid *wire_0_1_solid = new G4UnionSolid("wire_0_1", wire0_solid, wire1_solid, rot_w01, deltaw_0_1 );
+
+        G4LogicalVolume* wireTop_logVol = new G4LogicalVolume( wire_0_1_solid, wire_Shield_Material, "WireTop_Logical");
+        
+        //m_Wire_LogicalVolumes.push_back( wireTop_logVol );
+        
+        G4RotationMatrix* rot_w0 = new G4RotationMatrix();//(matrixColumn1, matrixColumn2, matrixColumn3);
+        rot_w0->rotateY( 270.0 * degree );
+        //m_Rotations.push_back(rot_w0);
+
+        G4RotationMatrix* rot_w0_1 = new G4RotationMatrix();//(matrixColumn1, matrixColumn2, matrixColumn3);
+        rot_w0_1->rotateX( 15.0 * degree );
+        //m_Rotations.push_back(rot_w0_1);
+
+        G4RotationMatrix* rot_w02 = new G4RotationMatrix();//(matrixColumn1, matrixColumn2, matrixColumn3);
+        (*rot_w02) = (*rot_w0_1) * (*rot_w0);
+        //m_Rotations.push_back(rot_w02);
+        
+        position = G4ThreeVector( - 0.5 * z0 - 1.2 * mm, wireOffsetY, 0.0*mm );
+	new G4PVPlacement( rot_w02, position,  wireTop_logVol, "Wire0_Physical", m_logicWorld, 0, 0 );
+       
+        G4Torus* wire2_solid = new G4Torus( "wire_2" , rMin, rMax, Rtorus, 270.0 * degree, 90.0 * degree );
+        G4LogicalVolume* wireTop1_logVol = new G4LogicalVolume( wire2_solid, wire_Shield_Material, "WireTop1_Logical");
+        
+        //m_Wire_LogicalVolumes.push_back( wireTop1_logVol );
+        
+        G4RotationMatrix* rot_w2 = new G4RotationMatrix();//(matrixColumn1, matrixColumn2, matrixColumn3);
+        rot_w2->rotateX( 90.0 * degree );
+        //m_Rotations.push_back(rot_w2);
+        position = G4ThreeVector( 0.8*mm, ( 7.5*mm  + rMax ) , -15.0*mm );
+	new G4PVPlacement( rot_w2, position,  wireTop1_logVol, "Wire2_Physical", m_logicWorld, 0, 0 );
+        
+        G4Tubs* wire3_solid = new G4Tubs( "wire_3" , rMin, rMax, zHalfLength, startPhi, deltaPhi );
+        G4LogicalVolume* wireTop3_logVol = new G4LogicalVolume( wire3_solid, wire_Shield_Material, "WireTop3_Logical");
+        
+        //m_Wire_LogicalVolumes.push_back( wireTop3_logVol );
+
+        position += G4ThreeVector( Rtorus, 0.0 , -zHalfLength );
+	new G4PVPlacement( 0, position,  wireTop3_logVol, "Wire3_Physical", m_logicWorld, 0, 0 );
+
+        position[1] = -position[1];
+        position[2] += 2.0 * Rtorus;
+	new G4PVPlacement( 0, position,  wireTop3_logVol, "Wire3_Physical", m_logicWorld, 0, 0 );
+	
 	
 
 /**cable connector */
