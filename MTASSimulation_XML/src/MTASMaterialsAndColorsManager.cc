@@ -21,6 +21,7 @@ MTASMaterialsAndColorsManager::MTASMaterialsAndColorsManager()
 	G4double atomicMass;
 	G4double z;
 	G4double density;
+	G4double fractionmass;
 	G4int numberElements;
   
 	// Definicje pierwiastków tworzących materiały
@@ -69,7 +70,7 @@ MTASMaterialsAndColorsManager::MTASMaterialsAndColorsManager()
 	m_AluminiumOxide->AddElement( O, 3 );
 
 	m_CarbonFiber = new G4Material( "CarbonFiber", z=6., atomicMass=12.01*g/mole, density=1.8*g/cm3 );
-	m_SiliconPutty = new G4Material( "SiliconPutty", density= 0.5*g/cm3, numberElements=2 );
+	m_SiliconPutty = new G4Material( "SiliconPutty", density= 1.0*g/cm3, numberElements=2 );
 	m_SiliconPutty->AddElement( Si, 1 );
 	m_SiliconPutty->AddElement( O, 2 );
   
@@ -171,10 +172,16 @@ MTASMaterialsAndColorsManager::MTASMaterialsAndColorsManager()
 	m_Silver = new G4Material("Silver", density = 10.49 *g/cm3, numberElements = 1);
 	m_Silver->AddElement(Ag, 1);
 	
-	//Test cable (MS October 2022)
-	m_CableTest = new G4Material("CableTest", density = 3.00 *g/cm3, numberElements = 2);
-	m_CableTest->AddMaterial(m_Polyethylene, 50*perCent);
-	m_CableTest->AddMaterial(m_Copper, 50*perCent);
+	// Test cable (MS October 2022)
+	// Trying to improove Charlie vacuum/blob/cable
+	// valume fractions: 0.35 poly, 0.2 copper, 0.45 aluminum
+	// converts into mass fractions: 0.10 poly, 0.54 copper, 0.36 aluminium
+	m_CableTest = new G4Material("CableTest", density = 0.95 *g/cm3, numberElements = 3);
+	//m_CableTest->AddMaterial(m_Aluminium, fractionmass = 1.0);
+	//m_CableTest->AddElement(Cu, 1);
+	m_CableTest->AddMaterial(m_Polyethylene, fractionmass = 0.1);
+	m_CableTest->AddMaterial(m_Copper, fractionmass = 0.54); 
+	m_CableTest->AddMaterial(m_Aluminium, fractionmass = 0.36);
 	
 	m_LowDensityAluminium = new G4Material( "LowDensityAluminium", density= 0.95*g/cm3, numberElements=1 );
 	m_LowDensityAluminium->AddElement( Al, 1 );
@@ -268,6 +275,12 @@ MTASMaterialsAndColorsManager::~MTASMaterialsAndColorsManager()
 		
 	if( m_Polyethylene != 0 )
 		delete m_Polyethylene;
+		
+	if( m_CableTest != 0 )
+		delete m_CableTest;
+		
+	if( m_LowDensityAluminium != 0 )
+		delete m_LowDensityAluminium;
 		
 //colors
 	 if( m_Green != 0 )

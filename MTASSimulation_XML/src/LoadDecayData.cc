@@ -18,7 +18,7 @@ double CalculateHalfLifeTimeInSeconds(double time, std::string unit)
 		return time;
     else
     {
-			if(unit == "F")
+			if(unit == "NS")
 				return time * pow(10., -9.);
 			else if(unit == "MS")
 				return time * 0.001;

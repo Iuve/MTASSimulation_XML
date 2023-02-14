@@ -174,7 +174,7 @@ void MTASLadder::Construct()
 
         G4UnionSolid *wire_0_1_solid = new G4UnionSolid("wire_0_1", wire0_solid, wire1_solid, rot_w01, deltaw_0_1 );
 
-        G4LogicalVolume* wireTop_logVol = new G4LogicalVolume( wire_0_1_solid, wire_Shield_Material, "WireTop_Logical");
+        G4LogicalVolume* wireTop_logVol = new G4LogicalVolume( wire_0_1_solid, cableMaterial, "WireTop_Logical");
         
         //m_Wire_LogicalVolumes.push_back( wireTop_logVol );
         
@@ -194,7 +194,7 @@ void MTASLadder::Construct()
 	new G4PVPlacement( rot_w02, position,  wireTop_logVol, "Wire0_Physical", m_logicWorld, 0, 0 );
        
         G4Torus* wire2_solid = new G4Torus( "wire_2" , rMin, rMax, Rtorus, 270.0 * degree, 90.0 * degree );
-        G4LogicalVolume* wireTop1_logVol = new G4LogicalVolume( wire2_solid, wire_Shield_Material, "WireTop1_Logical");
+        G4LogicalVolume* wireTop1_logVol = new G4LogicalVolume( wire2_solid, cableMaterial, "WireTop1_Logical");
         
         //m_Wire_LogicalVolumes.push_back( wireTop1_logVol );
         
@@ -205,7 +205,7 @@ void MTASLadder::Construct()
 	new G4PVPlacement( rot_w2, position,  wireTop1_logVol, "Wire2_Physical", m_logicWorld, 0, 0 );
         
         G4Tubs* wire3_solid = new G4Tubs( "wire_3" , rMin, rMax, zHalfLength, startPhi, deltaPhi );
-        G4LogicalVolume* wireTop3_logVol = new G4LogicalVolume( wire3_solid, wire_Shield_Material, "WireTop3_Logical");
+        G4LogicalVolume* wireTop3_logVol = new G4LogicalVolume( wire3_solid, cableMaterial, "WireTop3_Logical");
         
         //m_Wire_LogicalVolumes.push_back( wireTop3_logVol );
 

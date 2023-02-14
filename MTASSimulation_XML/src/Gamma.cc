@@ -13,15 +13,12 @@ int finalLevelAtomicNumber, double electronConversionCoefficient, int atomicNumb
  finalLevelAtomicMass, finalLevelAtomicNumber, electronConversionCoefficient,
  atomicNumber)
 {
+	atomicNumber_ = atomicNumber;
+	electronConversionCoefficient_ = electronConversionCoefficient;
 	atomicTransitionManager_ = G4AtomicTransitionManager::Instance();
 	atomicTransitionManager_->Initialise();
 	InitializeShellNumbers();
 	
-	if(atomicNumber != 0)
-	{
-		atomicNumber_ = atomicNumber;
-		electronConversionCoefficient_ = electronConversionCoefficient;
-	}
 }
 
 Gamma::~Gamma()
@@ -40,6 +37,10 @@ void Gamma::InitializeShellNumbers()
 void Gamma::SetShellElectronConvCoef(std::string type, double value)
 {
 	//std::cout << type << " " << value << std::endl;
+	
+	if(type == "Total")
+        return;
+        
 		if(type == "KC" || type == "KC+" )
 			for(int i=0; i<numberOfShellIndexes_; i++)
 				shellElectonConvCoeff_[i] +=value;
