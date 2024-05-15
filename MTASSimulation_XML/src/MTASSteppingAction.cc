@@ -20,6 +20,7 @@ extern double g_eventInSeconds;
 
 MTASSteppingAction::MTASSteppingAction( )
 {
+	nSecondaryByLastStep = 0;
 }
 
 MTASSteppingAction::~MTASSteppingAction()
@@ -57,17 +58,33 @@ void MTASSteppingAction::UserSteppingAction(const G4Step* theStep)
 		track->SetTrackStatus(fStopAndKill);
 		} 
 	
+	/* 
+	 * 
+	const G4TrackVector* fSecondary = theStep->GetSecondary();
+	G4int nSecondary = fSecondary->size();
 		
+	G4String processName =theStep->GetPostStepPoint()->GetProcessDefinedStep()->GetProcessName();
+	if(processName == "neutronInelastic")
+	{
+		for (G4int i=nSecondaryByLastStep; i<nSecondary; i++)
+		{
+			const G4double kinEnergy = 0.0001;
+			G4String secParticleName = fSecondary->at(i)->GetDefinition()->GetParticleName();
+			if(secParticleName  == "I127")
+				fSecondary->at(i)->SetKineticEnergy(kinEnergy) ;
+		}
+	} 
+	 */
 	 
 	if(materialName == "SodiumIodide")
 	{
 		light = FindLight(theStep);
 		
 //  
-/*
-		G4String name   = particle->GetParticleName();
-		G4String type   = particle->GetParticleType(); 
-		
+
+		//G4String name   = particle->GetParticleName();
+		//G4String type   = particle->GetParticleType(); 
+/*		
 		G4int copyNumber = preStepTouch -> GetCopyNumber(4);
 
 	G4int eID = 0;
@@ -108,6 +125,8 @@ void MTASSteppingAction::UserSteppingAction(const G4Step* theStep)
 				std::cout<<"error: copy number = "<<copyNumber<<std::endl;
 		}
 	}
+	
+	//nSecondaryByLastStep = nSecondary;
 }
 
 

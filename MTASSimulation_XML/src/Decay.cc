@@ -18,6 +18,8 @@ Decay::Decay()
 	stopLevel_ = loadDecayData_->GetStopLevel();
 	cycleDurationInSeconds_ = loadDecayData_->GetCycleDurationInSeconds();
 	eventDurationInSeconds_ = loadDecayData_->GetEventDurationInSeconds();
+	measureDelayInSeconds_ = loadDecayData_->GetMeasureDelayInSeconds();
+	cycleDurationInSeconds_ += measureDelayInSeconds_;
 	isomerLevel_ = 0L;
 	eventTimeInSeconds_ = 0.;
 	SetEventLength(eventDurationInSeconds_);
@@ -35,6 +37,8 @@ std::vector<Event> Decay::GenerateEventList()
 	if( !eventList_.empty() )
 		eventList_.clear();
 	Level* currentLevel;
+	
+	label:
 
 	if(isomerLevel_ == 0L) //there is not "lefted" isomer from previous decay
 	{
@@ -60,9 +64,10 @@ std::vector<Event> Decay::GenerateEventList()
 	std::vector<Transition*>* transitionsForCheck;
 	transitionsForCheck = ( currentLevel->GetTransitions() );
 
-	while ( transitionsForCheck->size() && currentLevel != stopLevel_) // empty Transitions or STOP level
+	while ( transitionsForCheck->size() && currentLevel != stopLevel_ ) // empty Transitions or STOP level
 	{
-		nextLevel = FindTransition(currentLevel); // adding events to list in this line
+		if(eventTimeInSeconds_ > measureDelayInSeconds_)
+			nextLevel = FindTransition(currentLevel); // adding events to list in this line
 		currentLevel = nextLevel;
 		
 		if(!IfEmissionFromLevel(currentLevel, eventDurationInSeconds_))
@@ -79,6 +84,9 @@ std::vector<Event> Decay::GenerateEventList()
 		}
 		transitionsForCheck = ( currentLevel->GetTransitions() );
 	};
+	
+	if(eventList_.empty())
+		goto label;
 	
 	if(isomerLevel_ == 0L)
 		eventTimeInSeconds_ = 0.;

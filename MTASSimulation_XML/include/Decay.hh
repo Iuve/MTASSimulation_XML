@@ -42,6 +42,7 @@ private:
 	
 	double cycleDurationInSeconds_;
 	double eventDurationInSeconds_;
+	double measureDelayInSeconds_;
 };
 
 #endif	/* DECAY_H */

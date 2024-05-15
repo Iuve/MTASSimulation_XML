@@ -42,6 +42,7 @@ public:
 private:
 	G4double FindLight(const G4Step* theStep);
 	G4double LightForumla(G4double E);
+	G4int nSecondaryByLastStep;
 
 };
 

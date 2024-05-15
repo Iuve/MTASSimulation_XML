@@ -25,6 +25,7 @@ public:
 	
 	double GetCycleDurationInSeconds() { return cycleDurationInSeconds_; }
 	double GetEventDurationInSeconds() { return eventDurationInSeconds_; }
+	double GetMeasureDelayInSeconds() { return measureDelayInSeconds_; }
 
     void RecalculatePointersToLevels();
 
@@ -44,6 +45,7 @@ private:
 	
 	double cycleDurationInSeconds_;
 	double eventDurationInSeconds_;
+	double measureDelayInSeconds_;
 
 };
 

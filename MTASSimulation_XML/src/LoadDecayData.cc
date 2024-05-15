@@ -41,7 +41,7 @@ using namespace std;
 
 LoadDecayData::LoadDecayData()
 {
-	
+	measureDelayInSeconds_ = 0.;
 	LoadDataFromXml();
 //	cout << "SUCCESSFUL DATA LOADING" << endl;
 
@@ -93,8 +93,14 @@ void LoadDecayData::LoadDataFromXml()
 	tempTimeInSeconds = CalculateHalfLifeTimeInSeconds(tempTime, tempTimeUnit);
 	cycleDurationInSeconds_ = tempTimeInSeconds;
 	
+	tempTime = dir.child("MeasurementDelay").attribute("Value").as_double();
+	tempTimeUnit = dir.child("MeasurementDelay").attribute("TimeUnit").value();
+	tempTimeInSeconds = CalculateHalfLifeTimeInSeconds(tempTime, tempTimeUnit);
+	measureDelayInSeconds_ = tempTimeInSeconds;
+	
 	cout << "Event length set to " << eventDurationInSeconds_ << " seconds." << endl;
 	cout << "Cycle length set to " << cycleDurationInSeconds_ << " seconds." << endl;
+	cout << "Measurement delay set to " << measureDelayInSeconds_ << " seconds." << endl;
 	
 	if( !dir.child("SpecifyFirstTransition").empty() )
 	{
